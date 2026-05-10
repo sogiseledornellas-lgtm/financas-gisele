@@ -176,6 +176,19 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
 .mini-field input,.mini-field select{background:var(--bg4);border:1px solid var(--border);border-radius:var(--r6);padding:8px 10px;font-family:'Sora',sans-serif;font-size:12px;color:var(--text);width:100%}
 .mini-field input:focus,.mini-field select:focus{outline:none;border-color:var(--accent)}
 
+
+.compromisso-card{background:var(--bg3);border-radius:var(--r10);padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;border-left:3px solid var(--border2)}
+.compromisso-card.vence-hoje{border-left-color:var(--red)}
+.compromisso-card.vence-semana{border-left-color:var(--amber)}
+.compromisso-card.vence-mes{border-left-color:var(--blue)}
+.compromisso-icon{font-size:22px;flex-shrink:0}
+.compromisso-body{flex:1;min-width:0}
+.compromisso-nome{font-size:13px;font-weight:500}
+.compromisso-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.compromisso-val{font-size:14px;font-weight:700;color:var(--red);white-space:nowrap}
+.parc-form{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r14);padding:20px;margin-bottom:16px}
+.parc-tag{display:inline-flex;align-items:center;gap:4px;background:var(--amber-bg);color:var(--amber);border-radius:99px;padding:2px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
 </style>
 </head>
@@ -199,6 +212,9 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
     </button>
     <button class="nav-item" data-view="lancar" onclick="goView('lancar',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Lançar
+    </button>
+    <button class="nav-item" data-view="parcelados" onclick="goView('parcelados',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>Parcelamentos
     </button>
     <div class="nav-sep"></div>
     <button class="nav-item" data-view="faturas" onclick="goView('faturas',this)">
@@ -236,6 +252,7 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
 <div id="view-dash" class="view active">
   <div id="eq-wrap" class="mb20"></div>
   <div class="g4 mb14" id="metrics"></div>
+  <div class="card mb14" id="dash-compromissos"></div>
   <div class="g2 mb14">
     <div class="card" id="dash-faturas"></div>
     <div class="card" id="dash-cats"></div>
@@ -255,12 +272,48 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
     </div>
     <div class="form-row">
       <div class="field" style="margin-bottom:0"><label>Data</label><input type="date" id="f-date"/></div>
-      <div class="field" style="margin-bottom:0"><label>Valor (R$)</label><input type="number" id="f-val" placeholder="0,00" min="0" step="0.01"/></div>
+      <div class="field" style="margin-bottom:0"><label>Valor (R$)</label><input type="number" id="f-val" placeholder="0,00" min="0" step="0.01" oninput="calcParcelaInline()"/></div>
     </div>
     <div style="margin-top:12px" class="field"><label>Descrição</label><input type="text" id="f-desc" placeholder="Ex: Supermercado, Salário…"/></div>
     <div class="form-row">
       <div class="field" style="margin-bottom:0"><label>Categoria</label><select id="f-cat"></select></div>
-      <div class="field" style="margin-bottom:0" id="cartao-wrap"><label>Cartão / Forma</label><select id="f-cartao"></select></div>
+      <div class="field" style="margin-bottom:0" id="cartao-wrap"><label>Cartão / Forma</label><select id="f-cartao" onchange="onCartaoChange()"></select></div>
+    </div>
+    <!-- À vista ou Parcelado -->
+    <div id="pagamento-wrap" style="display:none;margin-top:12px">
+      <div class="field" style="margin-bottom:0">
+        <label>Forma de pagamento</label>
+        <div class="type-toggle">
+          <button class="type-btn on-r" id="btn-avista" onclick="setFormaPgto('avista')">💳 À vista</button>
+          <button class="type-btn" id="btn-parcelado" onclick="setFormaPgto('parcelado')">📅 Parcelado</button>
+        </div>
+      </div>
+      <!-- Campos parcelado -->
+      <div id="parc-inline-wrap" style="display:none;margin-top:12px">
+        <div class="form-row">
+          <div class="field" style="margin-bottom:0">
+            <label>Número de parcelas</label>
+            <input type="number" id="f-parc-num" placeholder="Ex: 12" min="2" max="360" oninput="calcParcelaInline()"/>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Valor da parcela (R$)</label>
+            <input type="number" id="f-parc-val" placeholder="Calculado auto" readonly style="background:var(--bg4);color:var(--accent)"/>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:8px">
+          <div class="field" style="margin-bottom:0">
+            <label>Mês da 1ª parcela</label>
+            <input type="month" id="f-parc-inicio"/>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Dia do vencimento</label>
+            <input type="number" id="f-parc-dia" placeholder="Ex: 10" min="1" max="31"/>
+          </div>
+        </div>
+        <div style="margin-top:8px;padding:10px 14px;background:var(--amber-bg);border-radius:var(--r10);font-size:12px;color:var(--amber)">
+          💡 O parcelamento será criado automaticamente e aparecerá em cada mês até a última parcela.
+        </div>
+      </div>
     </div>
     <div style="margin-top:16px"><button class="btn btn-accent btn-full" id="btn-add" onclick="addTxn()">+ Adicionar lançamento</button></div>
   </div>
@@ -295,10 +348,15 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
       <div class="card mb14">
         <div class="card-title">Meus cartões</div>
         <div id="cfg-cartoes"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-          <input type="text" id="nc-nome" placeholder="Nome do cartão" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r10);padding:9px 14px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text)"/>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px auto auto;gap:8px;margin-top:12px;align-items:center">
+          <input type="text" id="nc-nome" placeholder="Nome do cartão" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r10);padding:9px 14px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text)"/>
+          <input type="number" id="nc-fecha" placeholder="Fecha dia" min="1" max="31" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r10);padding:9px 10px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);text-align:center"/>
+          <input type="number" id="nc-vence" placeholder="Vence dia" min="1" max="31" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r10);padding:9px 10px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);text-align:center"/>
           <input type="color" id="nc-cor" value="#C8F060" style="width:38px;height:38px;border:1px solid var(--border);border-radius:var(--r6);padding:2px;background:var(--bg3);cursor:pointer"/>
           <button class="btn btn-ghost btn-sm" onclick="addCartao()">+ Add</button>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px;display:grid;grid-template-columns:1fr 80px 80px auto auto;gap:8px">
+          <span></span><span style="text-align:center">Fechamento</span><span style="text-align:center">Vencimento</span><span></span><span></span>
         </div>
       </div>
       <div class="card mb14">
@@ -351,6 +409,41 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
   </div>
 
   <div id="pat-content"></div>
+</div>
+
+<div id="view-parcelados" class="view">
+  <p class="page-title">Parcelamentos</p>
+
+  <!-- FORM novo parcelamento -->
+  <div class="parc-form mb14">
+    <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:6px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Nova compra parcelada
+    </div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div class="field" style="margin-bottom:0"><label>Descrição</label><input type="text" id="parc-desc" placeholder="Ex: TV Samsung, Sofá..."/></div>
+      <div class="field" style="margin-bottom:0"><label>Valor total (R$)</label><input type="number" id="parc-total" placeholder="0,00" min="0" step="0.01" oninput="calcParcela()"/></div>
+    </div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div class="field" style="margin-bottom:0"><label>Nº de parcelas</label><input type="number" id="parc-num" placeholder="Ex: 12" min="1" max="360" oninput="calcParcela()"/></div>
+      <div class="field" style="margin-bottom:0"><label>Valor da parcela (R$)</label><input type="number" id="parc-val" placeholder="Calculado auto" step="0.01" readonly style="background:var(--bg4);color:var(--accent)"/></div>
+    </div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div class="field" style="margin-bottom:0"><label>Mês inicial</label><input type="month" id="parc-inicio"/></div>
+      <div class="field" style="margin-bottom:0"><label>Dia do vencimento</label><input type="number" id="parc-dia" placeholder="Ex: 10" min="1" max="31"/></div>
+    </div>
+    <div class="form-row" style="margin-bottom:14px">
+      <div class="field" style="margin-bottom:0"><label>Categoria</label><select id="parc-cat"></select></div>
+      <div class="field" style="margin-bottom:0"><label>Cartão</label><select id="parc-cartao"></select></div>
+    </div>
+    <button class="btn btn-accent" onclick="addParcelamento()">+ Adicionar parcelamento</button>
+  </div>
+
+  <!-- LISTA de parcelamentos -->
+  <div class="card">
+    <div class="card-title">Parcelamentos ativos</div>
+    <div id="parc-lista"></div>
+  </div>
 </div>
 </main>
 
@@ -543,7 +636,7 @@ async function init(){
 // ══════════════════════════════════
 //  NAVIGATION
 // ══════════════════════════════════
-const VTITLES={dash:"Dashboard",lancar:"Novo Lançamento",faturas:"Faturas",txns:"Transações",relatorio:"Relatório",patrimonio:"Patrimônio",config:"Configurações"}
+const VTITLES={dash:"Dashboard",lancar:"Novo Lançamento",parcelados:"Parcelamentos",faturas:"Faturas",txns:"Transações",relatorio:"Relatório",patrimonio:"Patrimônio",config:"Configurações"}
 function chM(d){
   cur.m+=d;
   if(cur.m>11){cur.m=0;cur.y++}
@@ -567,7 +660,43 @@ function setTipo(t){
   document.getElementById("btn-r").className="type-btn"+(t==="r"?" on-r":"");
   document.getElementById("btn-d").className="type-btn"+(t==="d"?" on-d":"");
   document.getElementById("cartao-wrap").style.display=t==="d"?"":"none";
+  document.getElementById("pagamento-wrap").style.display=t==="d"?"":"none";
+  if(t==="r"){setFormaPgto("avista")}
   fillSelects();
+}
+
+let formaPgto="avista";
+function setFormaPgto(f){
+  formaPgto=f;
+  document.getElementById("btn-avista").className="type-btn"+(f==="avista"?" on-r":"");
+  document.getElementById("btn-parcelado").className="type-btn"+(f==="parcelado"?" on-d":"");
+  document.getElementById("parc-inline-wrap").style.display=f==="parcelado"?"":"none";
+  if(f==="parcelado"){
+    const hoje=new Date();
+    const mesAtual=hoje.getFullYear()+"-"+String(hoje.getMonth()+1).padStart(2,"0");
+    const el=document.getElementById("f-parc-inicio");
+    if(el&&!el.value)el.value=mesAtual;
+    // Pre-fill dia vencimento from selected cartao
+    const cartaoId=document.getElementById("f-cartao").value;
+    const cartao=DB.cartoes.find(c=>c.id===cartaoId);
+    const diaEl=document.getElementById("f-parc-dia");
+    if(diaEl&&cartao&&cartao.dia_vencimento)diaEl.value=cartao.dia_vencimento;
+  }
+}
+function onCartaoChange(){
+  if(formaPgto==="parcelado"){
+    const cartaoId=document.getElementById("f-cartao").value;
+    const cartao=DB.cartoes.find(c=>c.id===cartaoId);
+    const diaEl=document.getElementById("f-parc-dia");
+    if(diaEl&&cartao&&cartao.dia_vencimento)diaEl.value=cartao.dia_vencimento;
+  }
+}
+function calcParcelaInline(){
+  const val=parseFloat(document.getElementById("f-val").value)||0;
+  const num=parseInt(document.getElementById("f-parc-num").value)||0;
+  if(val>0&&num>0){
+    document.getElementById("f-parc-val").value=(val/num).toFixed(2);
+  }
 }
 function fillSelects(){
   const cats=tipo==="r"?DB.catsR:DB.catsD;
@@ -583,6 +712,36 @@ async function addTxn(){
   if(!descricao){toast("⚠ Digite uma descrição");return}
   if(!valor||valor<=0){toast("⚠ Digite um valor válido");return}
   if(!data){toast("⚠ Escolha a data");return}
+
+  // Se for parcelado no cartão, cria parcelamento automático
+  if(tipo==="d"&&formaPgto==="parcelado"){
+    const num=parseInt(document.getElementById("f-parc-num").value);
+    const inicio=document.getElementById("f-parc-inicio").value;
+    const dia=parseInt(document.getElementById("f-parc-dia").value)||10;
+    if(!num||num<2){toast("⚠ Digite o número de parcelas");return}
+    if(!inicio){toast("⚠ Escolha o mês da 1ª parcela");return}
+    const valParcela=parseFloat((valor/num).toFixed(2));
+    const [ano,mes]=inicio.split("-").map(Number);
+    parcDB.push({
+      id:"p"+Date.now(),
+      desc:descricao,valor_total:valor,num_parcelas:num,
+      valor_parcela:valParcela,
+      ano_inicio:ano,mes_inicio:mes,
+      dia_vencimento:dia,cat:categoria_id,cartao:cartao_id,
+      ativo:true,criado_em:new Date().toISOString()
+    });
+    saveParc();
+    document.getElementById("f-desc").value="";
+    document.getElementById("f-val").value="";
+    document.getElementById("f-parc-num").value="";
+    document.getElementById("f-parc-val").value="";
+    setFormaPgto("avista");
+    toast("✅ "+descricao+" parcelado em "+num+"x de "+brl(valParcela)+" — aparece automaticamente em cada mês!");
+    render();
+    return;
+  }
+
+  // À vista — lançamento normal
   const btn=document.getElementById("btn-add");
   btn.disabled=true;btn.textContent="Salvando...";
   setSyncStatus("loading");
@@ -611,13 +770,17 @@ async function deleteTxn(id){
 async function addCartao(){
   const nome=document.getElementById("nc-nome").value.trim();
   const cor=document.getElementById("nc-cor").value;
+  const dia_fechamento=parseInt(document.getElementById("nc-fecha").value)||20;
+  const dia_vencimento=parseInt(document.getElementById("nc-vence").value)||5;
   if(!nome){toast("⚠ Digite o nome");return}
   setSyncStatus("loading");
   try{
-    const [novo]=await api.addCartao({nome,cor});
+    const [novo]=await api.addCartao({nome,cor,dia_fechamento,dia_vencimento});
     DB.cartoes.push(novo);
     document.getElementById("nc-nome").value="";
-    setSyncStatus("ok");toast("✅ Cartão "+nome+" adicionado!");render();
+    document.getElementById("nc-fecha").value="";
+    document.getElementById("nc-vence").value="";
+    setSyncStatus("ok");toast("✅ Cartão "+nome+" adicionado! Fecha dia "+dia_fechamento+", vence dia "+dia_vencimento);render();
   }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
 }
 async function removeCartao(id){
@@ -626,6 +789,18 @@ async function removeCartao(id){
     await api.delCartao(id);
     DB.cartoes=DB.cartoes.filter(c=>c.id!==id);
     setSyncStatus("ok");render();
+  }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
+}
+async function updateCartaoCiclo(id,campo,val){
+  const idx=DB.cartoes.findIndex(c=>c.id===id);
+  if(idx<0)return;
+  DB.cartoes[idx][campo]=parseInt(val)||0;
+  setSyncStatus("loading");
+  try{
+    await sbFetch("cartoes?id=eq."+id,{method:"PATCH",body:JSON.stringify({[campo]:parseInt(val)||0})});
+    setSyncStatus("ok");
+    toast("✅ Ciclo do cartão atualizado!");
+    render();
   }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
 }
 async function addCat(tc){
@@ -689,6 +864,7 @@ function render(){
   if(curView==="relatorio")renderRelatorio(txns,rec,desp,saldo);
   if(curView==="config")renderConfig();
   if(curView==="patrimonio")renderPatrimonio();
+  if(curView==="parcelados")renderParcelados();
 }
 
 function renderDash(txns,rec,desp,saldo){
@@ -712,6 +888,7 @@ function renderDash(txns,rec,desp,saldo){
       <span style="font-size:20px">💡</span>Configure os <strong style="color:var(--accent);cursor:pointer" onclick="goView('config',document.querySelector('[data-view=config]'))">orçamentos por categoria</strong> para ver seu ponto de equilíbrio.
     </div>`;
   }
+  renderCompromissos(txns);
   document.getElementById("eq-wrap").innerHTML=eqHtml;
   document.getElementById("metrics").innerHTML=`
     <div class="metric"><div class="metric-label">Receitas</div><div class="metric-val" style="color:var(--green)">${brl(rec)}</div><div class="metric-sub">neste mês</div></div>
@@ -734,17 +911,116 @@ function renderDash(txns,rec,desp,saldo){
   } else {document.getElementById("dash-orc").style.display="none"}
 }
 
-function renderFaturas(txns){
-  const despTxns=txns.filter(t=>t.tipo==="d");
-  const byCartao={};despTxns.forEach(t=>{if(!byCartao[t.cartao_id])byCartao[t.cartao_id]=[];byCartao[t.cartao_id].push(t)});
-  const allC=[{id:"dinheiro",nome:"Dinheiro / Pix",cor:"#4ADE80"},...DB.cartoes];
-  let html="";let algum=false;
-  allC.forEach(c=>{
-    const items=byCartao[c.id];if(!items||!items.length)return;algum=true;
-    const total=items.reduce((s,t)=>s+Number(t.valor),0);
-    const byCat={};items.forEach(t=>{byCat[t.categoria_id]=(byCat[t.categoria_id]||0)+Number(t.valor)});
-    html+=`<div class="fatura-card"><div class="fatura-head"><div class="fatura-head-left"><div class="fatura-dot" style="background:${c.cor}"></div><div><div class="fatura-nome">${c.nome}</div><div class="fatura-count">${items.length} lançamento${items.length>1?"s":""}</div></div></div><div class="fatura-total" style="color:${c.cor}">${brl(total)}</div></div><div class="fatura-cats">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cid,v])=>{const cat=getCat(cid);return`<div class="fatura-cat-item">${cat.icon} ${cat.nome}: <strong>${brl(v)}</strong></div>`}).join("")}</div><div class="fatura-items">${items.sort((a,b)=>b.data.localeCompare(a.data)).map(t=>{const d=new Date(t.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});const cat=getCat(t.categoria_id);return`<div class="fatura-item"><div class="fatura-item-date">${d}</div><div style="flex:1;min-width:0"><div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.descricao}</div><div style="font-size:11px;color:var(--text2)">${cat.icon} ${cat.nome}</div></div><div class="fatura-item-val">${brl(t.valor)}</div><button class="row-del" onclick="deleteTxn('${t.id}')">×</button></div>`}).join("")}</div></div>`;
+function getFaturaPeriodo(cartao){
+  // Retorna período da fatura baseado no ciclo do cartão
+  const fecha=cartao.dia_fechamento||20;
+  const vence=cartao.dia_vencimento||5;
+  const hoje=new Date();
+  const diaHoje=hoje.getDate();
+  const mesRef=cur.m; // 0-indexed
+  const anoRef=cur.y;
+
+  // Fatura ATUAL: do fechamento do mês anterior até o fechamento deste mês
+  let inicioAtual=new Date(anoRef,mesRef-1,fecha+1);
+  let fimAtual=new Date(anoRef,mesRef,fecha);
+
+  // Data de vencimento da fatura atual
+  let vencAtual=new Date(anoRef,mesRef+1,vence); // vence no mês seguinte
+
+  return{inicioAtual,fimAtual,vencAtual,fecha,vence};
+}
+
+function getTxnsFatura(allTxns,cartaoId,inicio,fim){
+  return allTxns.filter(t=>{
+    if(t.cartao_id!==cartaoId||t.tipo!=="d")return false;
+    if(t.sintetico)return false;
+    const d=new Date(t.data+"T12:00:00");
+    return d>=inicio&&d<=fim;
   });
+}
+
+function renderFaturaCard(c,items,label,vencimento,cor_label){
+  if(!items.length)return"";
+  const total=items.reduce((s,t)=>s+Number(t.valor),0);
+  const byCat={};items.forEach(t=>{byCat[t.categoria_id]=(byCat[t.categoria_id]||0)+Number(t.valor)});
+  const vencStr=vencimento?vencimento.toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"}):"";
+  return`<div class="fatura-card" style="border-top:3px solid ${c.cor}">
+    <div class="fatura-head">
+      <div class="fatura-head-left">
+        <div class="fatura-dot" style="background:${c.cor}"></div>
+        <div>
+          <div class="fatura-nome">${c.nome}</div>
+          <div class="fatura-count">
+            <span style="background:${cor_label}22;color:${cor_label};padding:1px 8px;border-radius:99px;font-size:10px;font-weight:600">${label}</span>
+            ${vencStr?`<span style="color:var(--text2);font-size:11px;margin-left:6px">Vence ${vencStr}</span>`:""}
+          </div>
+        </div>
+      </div>
+      <div class="fatura-total" style="color:${c.cor}">${brl(total)}</div>
+    </div>
+    <div class="fatura-cats">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cid,v])=>{const cat=getCat(cid);return`<div class="fatura-cat-item">${cat.icon} ${cat.nome}: <strong>${brl(v)}</strong></div>`}).join("")}</div>
+    <div class="fatura-items">${items.sort((a,b)=>b.data.localeCompare(a.data)).map(t=>{
+      const d=new Date(t.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
+      const cat=getCat(t.categoria_id);
+      return`<div class="fatura-item"><div class="fatura-item-date">${d}</div><div style="flex:1;min-width:0"><div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.descricao}</div><div style="font-size:11px;color:var(--text2)">${cat.icon} ${cat.nome}</div></div><div class="fatura-item-val">${brl(t.valor)}</div><button class="row-del" onclick="deleteTxn('${t.id}')">×</button></div>`;
+    }).join("")}</div>
+  </div>`;
+}
+
+function renderFaturas(txns){
+  // Buscar TODAS as transações para calcular faturas corretamente
+  const allTxns=DB.txns;
+  const allC=[...DB.cartoes];
+  let html="";let algum=false;
+
+  // Dinheiro/Pix — sem ciclo de fatura, mostra normal
+  const dinheiroItems=txns.filter(t=>t.cartao_id==="dinheiro"&&t.tipo==="d"&&!t.sintetico);
+  if(dinheiroItems.length){
+    algum=true;
+    const total=dinheiroItems.reduce((s,t)=>s+Number(t.valor),0);
+    const byCat={};dinheiroItems.forEach(t=>{byCat[t.categoria_id]=(byCat[t.categoria_id]||0)+Number(t.valor)});
+    html+=`<div class="fatura-card" style="border-top:3px solid #4ADE80">
+      <div class="fatura-head">
+        <div class="fatura-head-left"><div class="fatura-dot" style="background:#4ADE80"></div><div><div class="fatura-nome">Dinheiro / Pix</div><div class="fatura-count">${dinheiroItems.length} lançamento${dinheiroItems.length>1?"s":""}</div></div></div>
+        <div class="fatura-total" style="color:#4ADE80">${brl(total)}</div>
+      </div>
+      <div class="fatura-cats">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cid,v])=>{const cat=getCat(cid);return`<div class="fatura-cat-item">${cat.icon} ${cat.nome}: <strong>${brl(v)}</strong></div>`}).join("")}</div>
+      <div class="fatura-items">${dinheiroItems.sort((a,b)=>b.data.localeCompare(a.data)).map(t=>{const d=new Date(t.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});const cat=getCat(t.categoria_id);return`<div class="fatura-item"><div class="fatura-item-date">${d}</div><div style="flex:1;min-width:0"><div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.descricao}</div><div style="font-size:11px;color:var(--text2)">${cat.icon} ${cat.nome}</div></div><div class="fatura-item-val">${brl(t.valor)}</div><button class="row-del" onclick="deleteTxn('${t.id}')">×</button></div>`}).join("")}</div>
+    </div>`;
+  }
+
+  allC.forEach(c=>{
+    const{inicioAtual,fimAtual,vencAtual,fecha,vence}=getFaturaPeriodo(c);
+
+    // Próxima fatura: do dia fecha+1 deste mês até dia fecha do próximo mês
+    const inicioProx=new Date(cur.y,cur.m,fecha+1);
+    const fimProx=new Date(cur.y,cur.m+1,fecha);
+    const vencProx=new Date(cur.y,cur.m+2,vence);
+
+    const itemsAtual=getTxnsFatura(allTxns,c.id,inicioAtual,fimAtual);
+    const itemsProx=getTxnsFatura(allTxns,c.id,inicioProx,fimProx);
+
+    if(!itemsAtual.length&&!itemsProx.length)return;
+    algum=true;
+
+    // Info do ciclo
+    html+=`<div style="font-size:11px;color:var(--text2);margin-bottom:6px;padding:6px 14px;background:var(--bg3);border-radius:var(--r6);display:inline-flex;gap:12px;align-items:center">
+      <span style="color:${c.cor};font-weight:600">${c.nome}</span>
+      <span>📅 Fecha dia <strong>${fecha}</strong></span>
+      <span>💳 Vence dia <strong>${vence}</strong> do mês seguinte</span>
+    </div>`;
+
+    html+=renderFaturaCard(c,itemsAtual,
+      "FATURA ATUAL — pagar em "+vencAtual.toLocaleDateString("pt-BR",{month:"short",year:"numeric"}),
+      vencAtual,"var(--red)");
+
+    html+=renderFaturaCard(c,itemsProx,
+      "PRÓXIMA FATURA — pagar em "+vencProx.toLocaleDateString("pt-BR",{month:"short",year:"numeric"}),
+      vencProx,"var(--blue)");
+
+    html+="<div style='margin-bottom:20px'></div>";
+  });
+
   document.getElementById("faturas-list").innerHTML=algum?html:`<div class="empty" style="padding:60px 0"><div class="empty-icon">💳</div>Nenhuma despesa lançada neste mês.</div>`;
 }
 
@@ -775,12 +1051,244 @@ function renderRelatorio(txns,rec,desp,saldo){
 }
 
 function renderConfig(){
-  document.getElementById("cfg-cartoes").innerHTML=DB.cartoes.map(c=>`<div class="cfg-item"><div style="width:16px;height:16px;border-radius:50%;background:${c.cor};flex-shrink:0"></div><div class="cfg-item-body">${c.nome}</div><button class="btn btn-danger btn-sm" onclick="removeCartao('${c.id}')">Remover</button></div>`).join("")||`<div style="font-size:13px;color:var(--text3);padding:8px 0">Nenhum cartão.</div>`;
+  document.getElementById("cfg-cartoes").innerHTML=DB.cartoes.map(c=>`<div class="cfg-item">
+    <div style="width:16px;height:16px;border-radius:50%;background:${c.cor};flex-shrink:0"></div>
+    <div class="cfg-item-body">
+      <div>${c.nome}</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px">
+        Fecha dia <strong style="color:var(--text)">${c.dia_fechamento||20}</strong> · Vence dia <strong style="color:var(--text)">${c.dia_vencimento||5}</strong> do mês seguinte
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div style="text-align:center">
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Fecha</div>
+        <input type="number" min="1" max="31" value="${c.dia_fechamento||20}" style="width:44px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r6);padding:4px 6px;font-family:'Sora',sans-serif;font-size:12px;color:var(--text);text-align:center" onchange="updateCartaoCiclo('${c.id}','dia_fechamento',this.value)"/>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Vence</div>
+        <input type="number" min="1" max="31" value="${c.dia_vencimento||5}" style="width:44px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r6);padding:4px 6px;font-family:'Sora',sans-serif;font-size:12px;color:var(--text);text-align:center" onchange="updateCartaoCiclo('${c.id}','dia_vencimento',this.value)"/>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="removeCartao('${c.id}')">Remover</button>
+    </div>
+  </div>`).join("")||`<div style="font-size:13px;color:var(--text3);padding:8px 0">Nenhum cartão.</div>`;
   document.getElementById("cfg-cats-r").innerHTML=DB.catsR.map(c=>`<div class="cfg-item"><span style="font-size:18px">${c.icon}</span><div class="cfg-item-body">${c.nome}</div><button class="btn btn-danger btn-sm" onclick="removeCat('r','${c.id}')">×</button></div>`).join("");
   document.getElementById("cfg-cats-d").innerHTML=DB.catsD.map(c=>`<div class="cfg-item"><span style="font-size:18px">${c.icon}</span><div class="cfg-item-body">${c.nome}</div><button class="btn btn-danger btn-sm" onclick="removeCat('d','${c.id}')">×</button></div>`).join("");
   document.getElementById("cfg-orcamentos").innerHTML=DB.catsD.map(c=>`<div class="cfg-item"><span style="font-size:18px">${c.icon}</span><div class="cfg-item-body">${c.nome}</div><input class="orc-input" type="number" min="0" step="50" placeholder="R$ 0" value="${getOrc(c.id)||""}" onchange="setOrc('${c.id}',this.value)" oninput="setOrc('${c.id}',this.value)"/></div>`).join("");
 }
 
+
+
+// ══════════════════════════════════
+//  PARCELAMENTOS
+// ══════════════════════════════════
+let parcDB=[];
+function loadParc(){try{parcDB=JSON.parse(localStorage.getItem("gf_parcelamentos")||"[]")}catch{parcDB=[]}}
+function saveParc(){localStorage.setItem("gf_parcelamentos",JSON.stringify(parcDB))}
+loadParc();
+
+function calcParcela(){
+  const total=parseFloat(document.getElementById("parc-total").value)||0;
+  const num=parseInt(document.getElementById("parc-num").value)||0;
+  if(total>0&&num>0){
+    document.getElementById("parc-val").value=(total/num).toFixed(2);
+  }
+}
+
+function fillParcSelects(){
+  const cats=DB.catsD;
+  const el=document.getElementById("parc-cat");
+  if(el)el.innerHTML=cats.map(c=>`<option value="${c.id}">${c.icon} ${c.nome}</option>`).join("");
+  const elc=document.getElementById("parc-cartao");
+  if(elc)elc.innerHTML=`<option value="dinheiro">💵 Dinheiro / Pix</option>`+DB.cartoes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join("");
+}
+
+function addParcelamento(){
+  const desc=document.getElementById("parc-desc").value.trim();
+  const total=parseFloat(document.getElementById("parc-total").value);
+  const num=parseInt(document.getElementById("parc-num").value);
+  const inicio=document.getElementById("parc-inicio").value;
+  const dia=parseInt(document.getElementById("parc-dia").value)||10;
+  const cat=document.getElementById("parc-cat").value;
+  const cartao=document.getElementById("parc-cartao").value;
+  if(!desc){toast("⚠ Digite a descrição");return}
+  if(!total||total<=0){toast("⚠ Digite o valor total");return}
+  if(!num||num<=0){toast("⚠ Digite o número de parcelas");return}
+  if(!inicio){toast("⚠ Escolha o mês inicial");return}
+  const valParcela=parseFloat((total/num).toFixed(2));
+  const [ano,mes]=inicio.split("-").map(Number);
+  parcDB.push({
+    id:"p"+Date.now(),
+    desc,valor_total:total,num_parcelas:num,
+    valor_parcela:valParcela,
+    ano_inicio:ano,mes_inicio:mes,
+    dia_vencimento:dia,cat,cartao,
+    ativo:true,criado_em:new Date().toISOString()
+  });
+  saveParc();
+  document.getElementById("parc-desc").value="";
+  document.getElementById("parc-total").value="";
+  document.getElementById("parc-num").value="";
+  document.getElementById("parc-val").value="";
+  toast("✅ Parcelamento adicionado! As parcelas aparecem automaticamente em cada mês.");
+  renderParcelados();
+  render();
+}
+
+function delParc(id){
+  parcDB=parcDB.filter(p=>p.id!==id);
+  saveParc();toast("🗑 Parcelamento removido");
+  renderParcelados();render();
+}
+
+function getParcMes(y,m){
+  // Retorna parcelas ativas neste mês/ano
+  return parcDB.filter(p=>{
+    if(!p.ativo)return false;
+    const inicio=p.ano_inicio*12+p.mes_inicio;
+    const fim=inicio+p.num_parcelas-1;
+    const atual=y*12+m;
+    return atual>=inicio&&atual<=fim;
+  }).map(p=>{
+    const inicio=p.ano_inicio*12+p.mes_inicio;
+    const atual=cur.y*12+cur.m;
+    const numParcela=atual-inicio+1;
+    return{...p,numParcela,parcRestantes:p.num_parcelas-numParcela};
+  });
+}
+
+function renderParcelados(){
+  fillParcSelects();
+  // Set default month
+  const hoje=new Date();
+  const mesAtual=hoje.getFullYear()+"-"+String(hoje.getMonth()+1).padStart(2,"0");
+  const el=document.getElementById("parc-inicio");
+  if(el&&!el.value)el.value=mesAtual;
+
+  const lista=document.getElementById("parc-lista");
+  if(!lista)return;
+  if(!parcDB.length){
+    lista.innerHTML=`<div class="empty"><div class="empty-icon">📅</div>Nenhum parcelamento cadastrado.</div>`;
+    return;
+  }
+  lista.innerHTML=parcDB.map(p=>{
+    const inicio=new Date(p.ano_inicio,p.mes_inicio-1,1);
+    const fim=new Date(p.ano_inicio,p.mes_inicio-1+p.num_parcelas-1,1);
+    const cart=getCartao(p.cartao);
+    const cat=getCat(p.cat);
+    const hoje2=new Date();
+    const atual=p.ano_inicio*12+p.mes_inicio;
+    const atualHoje=hoje2.getFullYear()*12+(hoje2.getMonth()+1);
+    const parcAtual=atualHoje-atual+1;
+    const restantes=p.num_parcelas-Math.max(0,parcAtual-1);
+    const pct=Math.min(100,Math.round((Math.max(0,parcAtual-1))/p.num_parcelas*100));
+    return`<div style="background:var(--bg3);border-radius:var(--r10);padding:14px;margin-bottom:8px;border-left:3px solid ${cart.cor}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+        <div>
+          <div style="font-size:13px;font-weight:600">${p.desc}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${cat.icon} ${cat.nome} · <span style="color:${cart.cor}">${cart.nome}</span> · vence dia ${p.dia_vencimento}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="text-align:right">
+            <div style="font-size:16px;font-weight:700;color:var(--red)">${brl(p.valor_parcela)}<span style="font-size:10px;color:var(--text3)">/mês</span></div>
+            <div style="font-size:10px;color:var(--text3)">${restantes} parcelas restantes</div>
+          </div>
+          <button class="row-del" onclick="delParc('${p.id}')">×</button>
+        </div>
+      </div>
+      <div class="prog-wrap" style="height:6px"><div class="prog-fill" style="width:${pct}%;background:${cart.cor}"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px">
+        <span>${MESES[p.mes_inicio-1]} ${p.ano_inicio}</span>
+        <span>${pct}% pago · Total: ${brl(p.valor_total)}</span>
+        <span>${MESES[(p.mes_inicio-1+p.num_parcelas-1)%12]} ${p.ano_inicio+Math.floor((p.mes_inicio-1+p.num_parcelas-1)/12)}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderCompromissos(txns){
+  const parcMes=getParcMes(cur.y,cur.m);
+  const hoje=new Date();
+  const diaHoje=hoje.getDate();
+
+  // Empréstimos do patrimônio
+  const emprestimos=patDB.emprestimos||[];
+  const consorcios=patDB.consorcios||[];
+
+  let items=[];
+
+  // Parcelas do mês
+  parcMes.forEach(p=>{
+    const cart=getCartao(p.cartao);
+    const cat=getCat(p.cat);
+    const diasVenc=p.dia_vencimento-diaHoje;
+    const status=diasVenc<0?"vencido":diasVenc===0?"vence-hoje":diasVenc<=7?"vence-semana":"vence-mes";
+    items.push({
+      icon:cat.icon,
+      nome:p.desc,
+      meta:`Parcela ${p.numParcela}/${p.num_parcelas} · ${cart.nome} · dia ${p.dia_vencimento}`,
+      val:p.valor_parcela,
+      status,diasVenc,
+      cor:cart.cor
+    });
+  });
+
+  // Empréstimos fixos
+  emprestimos.forEach(e=>{
+    const venc=parseInt(e.vencimento_dia)||10;
+    const diasVenc=venc-diaHoje;
+    const status=diasVenc<0?"vencido":diasVenc===0?"vence-hoje":diasVenc<=7?"vence-semana":"vence-mes";
+    items.push({
+      icon:"🏦",
+      nome:e.nome,
+      meta:`Financiamento · ${e.credor||""} · dia ${venc}`,
+      val:parseFloat(e.valor_parcela||0),
+      status,diasVenc,
+      cor:"var(--red)"
+    });
+  });
+
+  // Consórcios
+  consorcios.forEach(c=>{
+    items.push({
+      icon:"🎯",
+      nome:c.nome,
+      meta:`Consórcio · ${c.administradora||""} · ${c.parcelas_restantes||0} parcelas restantes`,
+      val:parseFloat(c.valor_parcela||0),
+      status:"vence-mes",diasVenc:30,
+      cor:"var(--accent)"
+    });
+  });
+
+  const totalCompr=items.reduce((s,i)=>s+i.val,0);
+  const el=document.getElementById("dash-compromissos");
+  if(!el)return;
+  if(!items.length){
+    el.style.display="none";
+    return;
+  }
+  el.style.display="";
+  el.innerHTML=`
+    <div class="card-title">
+      <span>📅 Compromissos do mês</span>
+      <span style="color:var(--red);font-size:13px;font-weight:600">${brl(totalCompr)}</span>
+    </div>
+    ${items.sort((a,b)=>a.diasVenc-b.diasVenc).map(i=>{
+      const tagTxt=i.diasVenc<0?"VENCIDO":i.diasVenc===0?"HOJE":i.diasVenc<=7?`${i.diasVenc} dias`:`Dia ${i.status==="vence-mes"?i.meta.match(/dia (\d+)/)?.[1]||"":i.diasVenc+diaHoje}`;
+      const tagColor=i.diasVenc<0?"var(--red)":i.diasVenc===0?"var(--red)":i.diasVenc<=7?"var(--amber)":"var(--blue)";
+      return`<div class="compromisso-card ${i.status}" style="border-left-color:${i.cor}">
+        <div class="compromisso-icon">${i.icon}</div>
+        <div class="compromisso-body">
+          <div class="compromisso-nome">${i.nome}</div>
+          <div class="compromisso-meta">${i.meta}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div class="compromisso-val">${brl(i.val)}</div>
+          <span style="font-size:10px;font-weight:600;color:${tagColor};background:${tagColor}18;padding:2px 8px;border-radius:99px">${tagTxt}</span>
+        </div>
+      </div>`;
+    }).join("")}
+  `;
+}
 
 // ══════════════════════════════════
 //  PATRIMÔNIO
