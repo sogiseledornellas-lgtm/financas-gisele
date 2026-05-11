@@ -1177,37 +1177,37 @@ function toggleFaturaPaga(cartaoId,ano,mes){
 }
 
 function abrirModalPagar(cartaoId,ano,mes){
-  const cartao=getCartao(cartaoId);
-  const key=getFaturaKey(cartaoId,ano,mes);
-  document.getElementById("mp-cartao-id").value=cartaoId;
-  document.getElementById("mp-ano").value=ano;
-  document.getElementById("mp-mes").value=mes;
+  try{
+    const cartao=getCartao(cartaoId);
+    document.getElementById("mp-cartao-id").value=cartaoId;
+    document.getElementById("mp-ano").value=ano;
+    document.getElementById("mp-mes").value=mes;
 
-  // Calcular total da fatura
-  const allTxns=DB.txns;
-  const c=DB.cartoes.find(c=>c.id===cartaoId)||{dia_fechamento:20,dia_vencimento:5};
-  const fecha=c.dia_fechamento||20;
-  const inicioAtual=new Date(ano,mes-2,fecha+1);
-  const fimAtual=new Date(ano,mes-1,fecha);
-  const items=getTxnsFatura(allTxns,cartaoId,inicioAtual,fimAtual);
-  const total=items.reduce((s,t)=>s+Number(t.valor),0);
+    // Calcular total da fatura
+    const c=DB.cartoes.find(c=>c.id===cartaoId)||{dia_fechamento:20,dia_vencimento:5};
+    const fecha=c.dia_fechamento||20;
+    const inicioAtual=new Date(ano,mes-2,fecha+1);
+    const fimAtual=new Date(ano,mes-1,fecha);
+    const items=getTxnsFatura(DB.txns,cartaoId,inicioAtual,fimAtual);
+    const total=items.reduce((s,t)=>s+Number(t.valor),0);
+    const parcMes=getParcMes(ano,mes-1);
+    const totalParc=parcMes.filter(p=>p.cartao===cartaoId).reduce((s,p)=>s+p.valor_parcela,0);
+    const totalGeral=total+totalParc;
 
-  // Parcelas do mês
-  const parcMes=getParcMes(ano,mes-1);
-  const totalParc=parcMes.filter(p=>p.cartao===cartaoId).reduce((s,p)=>s+p.valor_parcela,0);
-  const totalGeral=total+totalParc;
-
-  document.getElementById("mp-total").value=totalGeral.toFixed(2);
-  document.getElementById("mp-valor").value=totalGeral.toFixed(2);
-  document.getElementById("mp-data").value=new Date().toISOString().split("T")[0];
-  document.getElementById("mp-obs").value="";
-  document.getElementById("mp-juros-val").value="";
-  document.getElementById("mp-atraso-dias").value="";
-  document.getElementById("mp-pagar-desc")||true;
-  document.getElementById("modal-pagar-desc").textContent=
-    cartao.nome+" — "+MESES[mes-1]+" "+ano+" — Total: "+brl(totalGeral);
-  setJuros(false);
-  openModal("modal-pagar");
+    document.getElementById("mp-total").value=totalGeral.toFixed(2);
+    document.getElementById("mp-valor").value=totalGeral.toFixed(2);
+    document.getElementById("mp-data").value=new Date().toISOString().split("T")[0];
+    document.getElementById("mp-obs").value="";
+    document.getElementById("mp-juros-val").value="";
+    document.getElementById("mp-atraso-dias").value="";
+    document.getElementById("modal-pagar-desc").textContent=
+      cartao.nome+" — "+MESES[mes-1]+" "+ano+" — Total: "+brl(totalGeral);
+    setJuros(false);
+    openModal("modal-pagar");
+  }catch(e){
+    console.error("Erro ao abrir modal:",e);
+    toast("⚠ Erro ao abrir modal: "+e.message);
+  }
 }
 
 let temJuros=false;
