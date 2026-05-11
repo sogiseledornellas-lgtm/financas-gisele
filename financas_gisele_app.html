@@ -1210,10 +1210,15 @@ function abrirModalPagar(cartaoId,ano,mes){
     document.getElementById("modal-pagar-desc").textContent=
       cartao.nome+" — "+MESES[mes-1]+" "+ano+" — Total: "+brl(totalGeral);
     setJuros(false);
-    openModal("modal-pagar");
+    const modalEl=document.getElementById("modal-pagar");
+    if(modalEl){
+      modalEl.style.display="flex";
+    } else {
+      toast("⚠ Modal não encontrado. Recarregue a página.");
+    }
   }catch(e){
     console.error("Erro ao abrir modal:",e);
-    toast("⚠ Erro ao abrir modal: "+e.message);
+    toast("⚠ Erro: "+e.message);
   }
 }
 
@@ -1230,7 +1235,7 @@ function calcTotalPagar(){
   document.getElementById("mp-total-juros").textContent=brl(base+juros);
   document.getElementById("mp-valor").value=(base+juros).toFixed(2);
 }
-function confirmarPagamento(){
+async function confirmarPagamento(){
   const cartaoId=document.getElementById("mp-cartao-id").value;
   const ano=parseInt(document.getElementById("mp-ano").value);
   const mes=parseInt(document.getElementById("mp-mes").value);
@@ -1241,20 +1246,71 @@ function confirmarPagamento(){
   const obs=document.getElementById("mp-obs").value.trim();
   if(!dataPag){toast("⚠ Informe a data do pagamento");return}
   if(!valorPago){toast("⚠ Informe o valor pago");return}
+
+  const cartao=getCartao(cartaoId);
   const key=getFaturaKey(cartaoId,ano,mes);
+
+  // Salvar status de paga
   faturasDB[key]={
     pago_em:new Date(dataPag+"T12:00:00").toISOString(),
     valor_pago:valorPago,
     juros:jurosVal,
     dias_atraso:atrasosDias,
-    obs,
-    tem_juros:temJuros
+    obs,tem_juros:temJuros
   };
   saveFaturas();
-  closeModal("modal-pagar");
-  toast(temJuros?"✅ Fatura paga — com juros de "+brl(jurosVal):"✅ Fatura paga em dia!");
+
+  // Lançar pagamento da fatura no fluxo de caixa (despesa no mês do pagamento)
+  setSyncStatus("loading");
+  try{
+    const descFatura="Pagamento fatura "+cartao.nome+" "+MESES[mes-1]+"/"+ano+
+      (obs?" — "+obs:"");
+    const [nova]=await api.addTxn({
+      descricao:descFatura,
+      valor:valorPago,
+      data:dataPag,
+      tipo:"d",
+      categoria_id:getCatFaturaId(),
+      cartao_id:"dinheiro"
+    });
+    DB.txns.unshift(nova);
+
+    // Se teve juros, lançar separado
+    if(temJuros&&jurosVal>0){
+      const descJuros="Juros/multa fatura "+cartao.nome+" ("+atrasosDias+" dias atraso)";
+      const [novaJ]=await api.addTxn({
+        descricao:descJuros,
+        valor:jurosVal,
+        data:dataPag,
+        tipo:"d",
+        categoria_id:getCatJurosId(),
+        cartao_id:"dinheiro"
+      });
+      DB.txns.unshift(novaJ);
+    }
+    setSyncStatus("ok");
+  }catch(e){
+    setSyncStatus("error");
+    console.error("Erro ao lançar pagamento:",e);
+    // Mesmo com erro no Supabase, salva localmente
+  }
+
+  fecharModalPagar();
+  toast(temJuros?"✅ Fatura paga! Lançado no fluxo de "+dataPag.split("-").reverse().join("/")+" com juros de "+brl(jurosVal)
+    :"✅ Fatura paga! Lançado no fluxo de "+dataPag.split("-").reverse().join("/"));
   renderFaturas(monthTxns());
   render();
+}
+
+function getCatFaturaId(){
+  // Busca categoria "Financeiro" ou a primeira de despesa
+  const cat=DB.catsD.find(c=>c.nome.toLowerCase().includes("financeiro")||c.nome.toLowerCase().includes("cartão")||c.nome.toLowerCase().includes("cartao"));
+  return cat?cat.id:(DB.catsD[0]?DB.catsD[0].id:"outros");
+}
+function getCatJurosId(){
+  // Busca categoria "Financeiro" para juros
+  const cat=DB.catsD.find(c=>c.nome.toLowerCase().includes("financeiro")||c.nome.toLowerCase().includes("juros")||c.nome.toLowerCase().includes("banco"));
+  return cat?cat.id:(DB.catsD[0]?DB.catsD[0].id:"outros");
 }
 
 // ══════════════════════════════════
@@ -1754,5 +1810,64 @@ function v(id){
 
 init();
 </script>
+
+<!-- MODAL PAGAR FATURA -->
+<div id="modal-pagar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r20);padding:28px;max-width:440px;width:90%;max-height:90vh;overflow-y:auto">
+    <div style="font-size:16px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px">💳 Registrar pagamento</div>
+    <div id="modal-pagar-desc" style="font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.5;padding:10px 14px;background:var(--bg3);border-radius:var(--r10)"></div>
+
+    <input type="hidden" id="mp-cartao-id"/>
+    <input type="hidden" id="mp-ano"/>
+    <input type="hidden" id="mp-mes"/>
+    <input type="hidden" id="mp-total"/>
+
+    <div class="form-row" style="margin-bottom:12px">
+      <div class="field" style="margin-bottom:0">
+        <label>Data do pagamento</label>
+        <input type="date" id="mp-data"/>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Valor pago (R$)</label>
+        <input type="number" id="mp-valor" placeholder="0,00" step="0.01" min="0"/>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:12px">
+      <label>Teve juros / multa por atraso?</label>
+      <div class="type-toggle">
+        <button class="type-btn on-r" id="mp-btn-sem" onclick="setJuros(false)">✓ Sem juros</button>
+        <button class="type-btn" id="mp-btn-com" onclick="setJuros(true)">⚠ Com juros</button>
+      </div>
+    </div>
+
+    <div id="mp-juros-wrap" style="display:none;margin-bottom:12px">
+      <div class="form-row" style="margin-bottom:10px">
+        <div class="field" style="margin-bottom:0">
+          <label>Valor dos juros/multa (R$)</label>
+          <input type="number" id="mp-juros-val" placeholder="0,00" step="0.01" min="0" oninput="calcTotalPagar()"/>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Dias de atraso</label>
+          <input type="number" id="mp-atraso-dias" placeholder="Ex: 5" min="0"/>
+        </div>
+      </div>
+      <div id="mp-total-wrap" style="padding:10px 14px;background:var(--red-bg);border-radius:var(--r10);font-size:13px;color:var(--red)">
+        Total com juros: <strong id="mp-total-juros">R$ 0,00</strong>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:20px">
+      <label>Observação (opcional)</label>
+      <input type="text" id="mp-obs" placeholder="Ex: Pago via débito, app..."/>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="fecharModalPagar()">Cancelar</button>
+      <button class="btn btn-accent" onclick="confirmarPagamento()">✓ Confirmar pagamento</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
