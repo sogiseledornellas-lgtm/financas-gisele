@@ -1176,6 +1176,13 @@ function toggleFaturaPaga(cartaoId,ano,mes){
   }
 }
 
+
+function dashPagar(btn){
+  const cartaoId=btn.getAttribute("data-cartao");
+  const ano=parseInt(btn.getAttribute("data-ano"));
+  const mes=parseInt(btn.getAttribute("data-mes"));
+  abrirModalPagar(cartaoId,ano,mes);
+}
 function abrirModalPagar(cartaoId,ano,mes){
   try{
     const cartao=getCartao(cartaoId);
