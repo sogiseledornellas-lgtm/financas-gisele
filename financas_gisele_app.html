@@ -395,6 +395,44 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
 
 <div class="toast" id="toast"></div>
 
+<div class="modal-bg" id="txn-modal">
+  <div class="modal">
+    <div class="modal-title">✏️ Editar lançamento</div>
+    <input type="hidden" id="et-id"/>
+    <input type="hidden" id="et-tipo"/>
+    <div class="form-row">
+      <div class="field" style="margin-bottom:12px"><label>Data</label><input type="date" id="et-date"/></div>
+      <div class="field" style="margin-bottom:12px"><label>Valor (R$)</label><input type="number" id="et-val" min="0" step="0.01"/></div>
+    </div>
+    <div class="field"><label>Descrição</label><input type="text" id="et-desc"/></div>
+    <div class="form-row">
+      <div class="field" style="margin-bottom:0"><label>Categoria</label><select id="et-cat"></select></div>
+      <div class="field" style="margin-bottom:0" id="et-cartao-wrap"><label>Cartão / Forma</label><select id="et-cartao"></select></div>
+    </div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn btn-ghost btn-sm" onclick="fecharTxnModal()">Cancelar</button>
+      <button class="btn btn-accent btn-sm" onclick="salvarTxnEdit()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="card-modal">
+  <div class="modal">
+    <div class="modal-title">✏️ Editar cartão</div>
+    <input type="hidden" id="ec-id"/>
+    <div class="field"><label>Nome do cartão</label><input type="text" id="ec-nome"/></div>
+    <div class="form-row">
+      <div class="field" style="margin-bottom:0"><label>Dia do fechamento</label><input type="number" id="ec-fechamento" min="1" max="31" placeholder="Ex: 5"/></div>
+      <div class="field" style="margin-bottom:0"><label>Dia do vencimento</label><input type="number" id="ec-vencimento" min="1" max="31" placeholder="Ex: 15"/></div>
+    </div>
+    <div class="field" style="margin-top:12px"><label>Cor</label><input type="color" id="ec-cor" style="width:48px;height:38px;border:1px solid var(--border);border-radius:var(--r6);padding:2px;background:var(--bg3);cursor:pointer"/></div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn btn-ghost btn-sm" onclick="fecharCardModal()">Cancelar</button>
+      <button class="btn btn-accent btn-sm" onclick="salvarCardEdit()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════
 //  SUPABASE CONFIG
@@ -424,9 +462,11 @@ async function sbFetch(path, opts={}){
 const api = {
   async getTxns(){ return sbFetch("transacoes?order=data.desc") },
   async addTxn(d){ return sbFetch("transacoes", {method:"POST",body:JSON.stringify(d)}) },
+  async updTxn(id,d){ return sbFetch("transacoes?id=eq."+id, {method:"PATCH",body:JSON.stringify(d)}) },
   async delTxn(id){ return sbFetch("transacoes?id=eq."+id, {method:"DELETE",prefer:""}) },
   async getCartoes(){ return sbFetch("cartoes?order=criado_em.asc") },
   async addCartao(d){ return sbFetch("cartoes", {method:"POST",body:JSON.stringify(d)}) },
+  async updCartao(id,d){ return sbFetch("cartoes?id=eq."+id, {method:"PATCH",body:JSON.stringify(d)}) },
   async delCartao(id){ return sbFetch("cartoes?id=eq."+id, {method:"DELETE",prefer:""}) },
   async getCats(tipo){ return sbFetch("categorias?tipo=eq."+tipo+"&order=criado_em.asc") },
   async addCat(d){ return sbFetch("categorias", {method:"POST",body:JSON.stringify(d)}) },
@@ -633,6 +673,68 @@ async function deleteTxn(id){
     DB.txns=DB.txns.filter(t=>t.id!==id);
     setSyncStatus("ok");toast("🗑 Removido");render();
   }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
+}
+function editTxn(id){
+  const t=DB.txns.find(x=>x.id===id);if(!t)return;
+  document.getElementById("et-id").value=t.id;
+  document.getElementById("et-tipo").value=t.tipo;
+  document.getElementById("et-date").value=t.data;
+  document.getElementById("et-val").value=t.valor;
+  document.getElementById("et-desc").value=t.descricao;
+  const cats=t.tipo==="r"?DB.catsR:DB.catsD;
+  document.getElementById("et-cat").innerHTML=cats.map(c=>`<option value="${c.id}"${c.id===t.categoria_id?" selected":""}>${c.icon} ${c.nome}</option>`).join("");
+  document.getElementById("et-cartao-wrap").style.display=t.tipo==="d"?"":"none";
+  document.getElementById("et-cartao").innerHTML=`<option value="dinheiro"${t.cartao_id==="dinheiro"?" selected":""}>💵 Dinheiro / Pix</option>`+DB.cartoes.map(c=>`<option value="${c.id}"${c.id===t.cartao_id?" selected":""}>${c.nome}</option>`).join("");
+  document.getElementById("txn-modal").classList.add("open");
+}
+function fecharTxnModal(){document.getElementById("txn-modal").classList.remove("open")}
+async function salvarTxnEdit(){
+  const id=document.getElementById("et-id").value;
+  const tipo=document.getElementById("et-tipo").value;
+  const data=document.getElementById("et-date").value;
+  const valor=parseFloat(document.getElementById("et-val").value);
+  const descricao=document.getElementById("et-desc").value.trim();
+  const categoria_id=document.getElementById("et-cat").value;
+  const cartao_id=tipo==="d"?document.getElementById("et-cartao").value:"dinheiro";
+  if(!descricao){toast("⚠ Digite uma descrição");return}
+  if(!valor||valor<=0){toast("⚠ Digite um valor válido");return}
+  if(!data){toast("⚠ Escolha a data");return}
+  setSyncStatus("loading");
+  try{
+    const [upd]=await api.updTxn(id,{data,valor,descricao,categoria_id,cartao_id});
+    const idx=DB.txns.findIndex(t=>t.id===id);
+    if(idx>=0)DB.txns[idx]=upd||{...DB.txns[idx],data,valor,descricao,categoria_id,cartao_id};
+    fecharTxnModal();
+    setSyncStatus("ok");toast("✅ Lançamento atualizado!");render();
+  }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
+}
+function editCard(id){
+  const c=DB.cartoes.find(x=>x.id===id);if(!c)return;
+  document.getElementById("ec-id").value=c.id;
+  document.getElementById("ec-nome").value=c.nome;
+  document.getElementById("ec-fechamento").value=c.dia_fechamento||"";
+  document.getElementById("ec-vencimento").value=c.dia_vencimento||"";
+  document.getElementById("ec-cor").value=c.cor||"#C8F060";
+  document.getElementById("card-modal").classList.add("open");
+}
+function fecharCardModal(){document.getElementById("card-modal").classList.remove("open")}
+async function salvarCardEdit(){
+  const id=document.getElementById("ec-id").value;
+  const nome=document.getElementById("ec-nome").value.trim();
+  const cor=document.getElementById("ec-cor").value;
+  const fechVal=document.getElementById("ec-fechamento").value;
+  const vencVal=document.getElementById("ec-vencimento").value;
+  const dia_fechamento=fechVal?parseInt(fechVal):null;
+  const dia_vencimento=vencVal?parseInt(vencVal):null;
+  if(!nome){toast("⚠ Digite o nome");return}
+  setSyncStatus("loading");
+  try{
+    const [upd]=await api.updCartao(id,{nome,cor,dia_fechamento,dia_vencimento});
+    const idx=DB.cartoes.findIndex(c=>c.id===id);
+    if(idx>=0)DB.cartoes[idx]=upd||{...DB.cartoes[idx],nome,cor,dia_fechamento,dia_vencimento};
+    fecharCardModal();
+    setSyncStatus("ok");toast("✅ Cartão atualizado!");render();
+  }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message+" — rodou o SQL das colunas dos cartões?",5000)}
 }
 
 // ══════════════════════════════════
@@ -909,35 +1011,4 @@ function renderTxns(txns,ml){
   document.getElementById("year-filter").innerHTML=years.map(y=>`<button class="year-btn${cur.y===y?" active":""}" onclick="cur.y=${y};render()">${y}</button>`).join("");
   document.getElementById("txn-period").textContent=ml;
   const fBtns=[{k:"todos",l:"Todos"},{k:"r",l:"↑ Receitas"},{k:"d",l:"↓ Despesas"},...DB.cartoes.map(c=>(({k:c.id,l:c.nome})))];
-  document.getElementById("txn-filters").innerHTML=fBtns.map(f=>`<button class="btn btn-ghost btn-sm" style="${txnFilter===f.k?"border-color:var(--accent);color:var(--accent)":""}" onclick="txnFilter='${f.k}';render()">${f.l}</button>`).join("");
-  let list=txns;
-  if(txnFilter==="r")list=txns.filter(t=>t.tipo==="r");
-  else if(txnFilter==="d")list=txns.filter(t=>t.tipo==="d");
-  else if(txnFilter!=="todos")list=txns.filter(t=>t.cartao_id===txnFilter);
-  list=[...list].sort((a,b)=>b.data.localeCompare(a.data));
-  if(!list.length){document.getElementById("txn-list").innerHTML=`<div class="empty"><div class="empty-icon">📋</div>Nenhum lançamento.</div>`;return}
-  document.getElementById("txn-list").innerHTML=list.map(t=>{const cat=getCat(t.categoria_id);const cart=t.tipo==="d"?getCartao(t.cartao_id):null;const d=new Date(t.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"2-digit"});return`<div class="list-row"><div style="font-size:22px;flex-shrink:0">${cat.icon}</div><div class="row-body"><div class="row-name">${t.descricao}</div><div class="row-meta">${cat.nome} · ${d}${cart?` · <span style="color:${cart.cor}">${cart.nome}</span>`:""}</div></div><div class="row-val" style="color:${t.tipo==="r"?"var(--green)":"var(--red)"}">${t.tipo==="r"?"+":"-"}${brl(t.valor)}</div><button class="row-del" onclick="deleteTxn('${t.id}')">×</button></div>`}).join("");
-}
-
-function renderRelatorio(txns,rec,desp,saldo){
-  const hist=[];
-  for(let i=5;i>=0;i--){let m=cur.m-i,y=cur.y;if(m<0){m+=12;y--}const mt=DB.txns.filter(t=>{const d=new Date(t.data+"T12:00:00");return d.getFullYear()===y&&d.getMonth()===m});const s=calcRes(mt);hist.push({label:MESES[m].slice(0,3),rec:s.rec,desp:s.desp})}
-  const maxH=Math.max(...hist.map(h=>Math.max(h.rec,h.desp)),1);
-  const despTxns=txns.filter(t=>t.tipo==="d");
-  const byCat={};despTxns.forEach(t=>{byCat[t.categoria_id]=(byCat[t.categoria_id]||0)+Number(t.valor)});
-  const catList=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-  const totalCat=catList.reduce((s,[,v])=>s+v,0);
-  document.getElementById("relatorio-content").innerHTML=`<div class="g2 mb14"><div class="card"><div class="card-title">Resumo do mês</div>${[["Receitas",brl(rec),"var(--green)"],["Despesas",brl(desp),"var(--red)"],["Saldo",brl(saldo),saldo>=0?"var(--green)":"var(--red)"],["Lançamentos",txns.length,"var(--text)"]].map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--text2)">${l}</span><span style="font-size:16px;font-weight:700;color:${c}">${v}</span></div>`).join("")}</div><div class="card"><div class="card-title">Histórico 6 meses</div><div style="display:flex;align-items:flex-end;gap:5px;height:90px;margin-bottom:8px">${hist.map(h=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:72px"><div style="flex:1;background:var(--green);opacity:.55;border-radius:3px 3px 0 0;height:${Math.max(2,Math.round(h.rec/maxH*72))}px"></div><div style="flex:1;background:var(--red);opacity:.55;border-radius:3px 3px 0 0;height:${Math.max(2,Math.round(h.desp/maxH*72))}px"></div></div><div style="font-size:9px;color:var(--text3)">${h.label}</div></div>`).join("")}</div><div style="display:flex;gap:14px;font-size:11px;color:var(--text2)"><span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>Receitas</span><span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span>Despesas</span></div></div></div><div class="card"><div class="card-title">Despesas por categoria</div>${catList.length===0?`<div class="empty">Sem despesas</div>`:catList.map(([cid,val])=>{const cat=getCat(cid);const p=totalCat>0?Math.round(val/totalCat*100):0;const orc=getOrc(cid);const over=orc>0&&val>orc;return`<div class="list-row"><div style="font-size:22px;flex-shrink:0">${cat.icon}</div><div class="row-body"><div class="row-name">${cat.nome}${over?` <span class="badge badge-red" style="font-size:9px">acima</span>`:""}</div><div class="prog-wrap" style="height:4px"><div class="prog-fill" style="width:${p}%;background:var(--blue)"></div></div><div style="font-size:10px;color:var(--text3)">${p}% do total${orc>0?` · limite: ${brl(orc)}`:""}</div></div><div class="row-val">${brl(val)}</div></div>`}).join("")}</div>`;
-}
-
-function renderConfig(){
-  document.getElementById("cfg-cartoes").innerHTML=DB.cartoes.map(c=>`<div class="cfg-item"><div style="width:16px;height:16px;border-radius:50%;background:${c.cor};flex-shrink:0"></div><div class="cfg-item-body">${c.nome}</div><button class="btn btn-danger btn-sm" onclick="removeCartao('${c.id}')">Remover</button></div>`).join("")||`<div style="font-size:13px;color:var(--text3);padding:8px 0">Nenhum cartão.</div>`;
-  document.getElementById("cfg-cats-r").innerHTML=DB.catsR.map(c=>`<div class="cfg-item"><span style="font-size:18px">${c.icon}</span><div class="cfg-item-body">${c.nome}</div><button class="btn btn-danger btn-sm" onclick="removeCat('r','${c.id}')">×</button></div>`).join("");
-  document.getElementById("cfg-cats-d").innerHTML=DB.catsD.map(c=>`<div class="cfg-item"><span style="font-size:18px">${c.icon}</span><div class="cfg-item-body">${c.nome}</div><button class="btn btn-danger btn-sm" onclick="removeCat('d','${c.id}')">×</button></div>`).join("");
-  document.getElementById("cfg-orcamentos").innerHTML=DB.catsD.map(c=>`<div class="cfg-item"><span style="font-size:18px">${c.icon}</span><div class="cfg-item-body">${c.nome}</div><input class="orc-input" type="number" min="0" step="50" placeholder="R$ 0" value="${getOrc(c.id)||""}" onchange="setOrc('${c.id}',this.value)" oninput="setOrc('${c.id}',this.value)"/></div>`).join("");
-}
-
-init();
-</script>
-</body>
-</html>
+  document.getEleme
