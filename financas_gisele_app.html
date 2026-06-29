@@ -49,6 +49,10 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
 .header{grid-column:2;grid-row:1;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:16px}
 .header-title{font-size:16px;font-weight:600}
 .header-right{display:flex;align-items:center;gap:8px}
+.hmonth-ctrl{display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:99px;padding:3px 4px}
+.hmonth-ctrl button{background:none;border:none;color:var(--text2);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'Sora',sans-serif}
+.hmonth-ctrl button:hover{background:var(--bg4);color:var(--text)}
+.hmonth-name{font-size:12px;font-weight:600;color:var(--text);min-width:96px;text-align:center}
 .hbadge{background:var(--bg3);border:1px solid var(--border);border-radius:99px;padding:5px 14px;font-size:12px;color:var(--text2)}
 .sync-status{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px}
 .main{grid-column:2;grid-row:2;overflow-y:auto;padding:24px 28px;background:var(--bg)}
@@ -71,7 +75,11 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
 .row-meta{font-size:11px;color:var(--text2);margin-top:2px}
 .row-val{font-size:14px;font-weight:600;white-space:nowrap}
 .row-del{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:var(--r6);font-size:16px;line-height:1;transition:color .15s}
+.row-edit{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:var(--r6);font-size:14px;line-height:1;transition:color .15s}
+.row-edit:hover{color:var(--accent)}
 .row-del:hover{color:var(--red)}
+.row-edit{background:none;border:none;cursor:pointer;padding:4px;border-radius:var(--r6);font-size:14px;line-height:1;opacity:.7;transition:opacity .15s}
+.row-edit:hover{opacity:1}
 .prog-wrap{height:4px;background:var(--bg4);border-radius:99px;overflow:hidden;margin:5px 0}
 .prog-fill{height:100%;border-radius:99px;transition:width .5s ease}
 .badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
@@ -138,8 +146,11 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
 @media(max-width:768px){
   .app{grid-template-columns:1fr;grid-template-rows:var(--header) 1fr var(--bottom-nav)}
   .sidebar{display:none}
-  .header{grid-column:1;grid-row:1}
+  .header{grid-column:1;grid-row:1;padding:0 14px}
   .main{grid-column:1;grid-row:2;padding:14px}
+  .sync-status{display:none}
+  .header-title{font-size:14px}
+  .hmonth-name{min-width:80px;font-size:11px}
   .bottom-nav{display:flex!important}
   .g4{grid-template-columns:1fr 1fr}
   .eq-grid{grid-template-columns:1fr}
@@ -150,67 +161,19 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
 .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:8px 4px;border-radius:var(--r10);color:var(--text3);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border:none;background:none;font-family:'Sora',sans-serif}
 .bnav-item.active{color:var(--accent)}
 .bnav-item svg{width:20px;height:20px}
-
-.pat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r14);padding:20px;margin-bottom:12px}
-.pat-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
-.pat-card-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
-.pat-card-vals{display:flex;gap:20px;flex-wrap:wrap}
-.pat-val-block{text-align:right}
-.pat-val-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
-.pat-val-num{font-size:16px;font-weight:700}
-.pat-progress{margin:10px 0}
-.pat-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px}
-.balanco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-@media(max-width:600px){.balanco-grid{grid-template-columns:1fr 1fr}}
-.balanco-card{background:var(--bg3);border-radius:var(--r10);padding:16px;text-align:center}
-.balanco-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-.balanco-val{font-size:20px;font-weight:700}
-.pat-form{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r14);padding:20px;margin-bottom:16px}
-.pat-form-title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:6px}
-.pat-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:500px){.pat-form-grid{grid-template-columns:1fr}}
-.pat-form-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-@media(max-width:600px){.pat-form-grid3{grid-template-columns:1fr 1fr}}
-.mini-field{display:flex;flex-direction:column;gap:4px}
-.mini-field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3)}
-.mini-field input,.mini-field select{background:var(--bg4);border:1px solid var(--border);border-radius:var(--r6);padding:8px 10px;font-family:'Sora',sans-serif;font-size:12px;color:var(--text);width:100%}
-.mini-field input:focus,.mini-field select:focus{outline:none;border-color:var(--accent)}
-
-
-.compromisso-card{background:var(--bg3);border-radius:var(--r10);padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;border-left:3px solid var(--border2)}
-.compromisso-card.vence-hoje{border-left-color:var(--red)}
-.compromisso-card.vence-semana{border-left-color:var(--amber)}
-.compromisso-card.vence-mes{border-left-color:var(--blue)}
-.compromisso-icon{font-size:22px;flex-shrink:0}
-.compromisso-body{flex:1;min-width:0}
-.compromisso-nome{font-size:13px;font-weight:500}
-.compromisso-meta{font-size:11px;color:var(--text2);margin-top:2px}
-.compromisso-val{font-size:14px;font-weight:700;color:var(--red);white-space:nowrap}
-.parc-form{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r14);padding:20px;margin-bottom:16px}
-.parc-tag{display:inline-flex;align-items:center;gap:4px;background:var(--amber-bg);color:var(--amber);border-radius:99px;padding:2px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-
-
-.fatura-paga-badge{display:inline-flex;align-items:center;gap:4px;background:var(--green-bg);color:var(--green);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:600}
-.fatura-pendente-badge{display:inline-flex;align-items:center;gap:4px;background:var(--red-bg);color:var(--red);border-radius:99px;padding:3px 12px;font-size:11px;font-weight:600}
-.btn-pagar{background:var(--green-bg);color:var(--green);border:1px solid var(--green);border-radius:var(--r6);padding:6px 14px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
-.btn-pagar:hover{background:var(--green);color:#0F0F0F}
-.btn-despagar{background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:var(--r6);padding:6px 14px;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
-.btn-despagar:hover{background:var(--bg4)}
-.fatura-card.paga{opacity:.7}
-.fatura-card.paga .fatura-total{text-decoration:line-through;opacity:.6}
-
-
-.modal-pagar{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r20);padding:28px;max-width:440px;width:90%}
-.modal-pagar-title{font-size:16px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.modal-pagar-sub{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.5}
-.juros-badge{display:inline-flex;align-items:center;gap:4px;background:var(--red-bg);color:var(--red);border-radius:99px;padding:2px 10px;font-size:11px;font-weight:600}
-.atraso-badge{display:inline-flex;align-items:center;gap:4px;background:var(--amber-bg);color:var(--amber);border-radius:99px;padding:2px 10px;font-size:11px;font-weight:600}
-.historico-pag{background:var(--bg3);border-radius:var(--r10);padding:12px 16px;margin-top:10px}
-.historico-pag-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:600}
-.historico-pag-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)}
-.historico-pag-row:last-child{border-bottom:none}
-
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+@media print{
+  html,body{overflow:visible!important;height:auto!important;background:#fff!important;color:#000!important}
+  .sidebar,.header,.bottom-nav,.no-print,.row-del,.row-edit{display:none!important}
+  .app{display:block!important;height:auto!important}
+  .main{overflow:visible!important;padding:0!important;grid-column:1!important;background:#fff!important}
+  .view{display:none!important}
+  #view-relatorio.active{display:block!important}
+  .card{background:#fff!important;border:1px solid #ccc!important;break-inside:avoid;page-break-inside:avoid}
+  .card-title,.page-title,.row-name,.row-val,.metric-val,.metric-label{color:#000!important}
+  .prog-fill{background:#888!important}
+  @page{margin:1.5cm}
+}
 </style>
 </head>
 <body>
@@ -234,9 +197,6 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
     <button class="nav-item" data-view="lancar" onclick="goView('lancar',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Lançar
     </button>
-    <button class="nav-item" data-view="parcelados" onclick="goView('parcelados',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>Parcelamentos
-    </button>
     <div class="nav-sep"></div>
     <button class="nav-item" data-view="faturas" onclick="goView('faturas',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Faturas
@@ -244,11 +204,11 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
     <button class="nav-item" data-view="txns" onclick="goView('txns',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Transações
     </button>
+    <button class="nav-item" data-view="patrimonio" onclick="goView('patrimonio',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>Patrimônio
+    </button>
     <button class="nav-item" data-view="relatorio" onclick="goView('relatorio',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatório
-    </button>
-    <button class="nav-item" data-view="patrimonio" onclick="goView('patrimonio',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>Patrimônio
     </button>
     <div class="nav-sep"></div>
     <button class="nav-item" data-view="config" onclick="goView('config',this)">
@@ -265,7 +225,11 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
   <div class="header-title" id="htitle">Dashboard</div>
   <div class="header-right">
     <div class="sync-status" id="sync-status">● Sincronizado</div>
-    <div class="hbadge" id="hmonth"></div>
+    <div class="hmonth-ctrl">
+      <button onclick="chM(-1)" aria-label="Mês anterior">&#8249;</button>
+      <div class="hmonth-name" id="hmonth"></div>
+      <button onclick="chM(1)" aria-label="Próximo mês">&#8250;</button>
+    </div>
   </div>
 </header>
 
@@ -273,7 +237,6 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
 <div id="view-dash" class="view active">
   <div id="eq-wrap" class="mb20"></div>
   <div class="g4 mb14" id="metrics"></div>
-  <div class="card mb14" id="dash-compromissos"></div>
   <div class="g2 mb14">
     <div class="card" id="dash-faturas"></div>
     <div class="card" id="dash-cats"></div>
@@ -293,48 +256,12 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
     </div>
     <div class="form-row">
       <div class="field" style="margin-bottom:0"><label>Data</label><input type="date" id="f-date"/></div>
-      <div class="field" style="margin-bottom:0"><label>Valor (R$)</label><input type="number" id="f-val" placeholder="0,00" min="0" step="0.01" oninput="calcParcelaInline()"/></div>
+      <div class="field" style="margin-bottom:0"><label>Valor (R$)</label><input type="number" id="f-val" placeholder="0,00" min="0" step="0.01"/></div>
     </div>
     <div style="margin-top:12px" class="field"><label>Descrição</label><input type="text" id="f-desc" placeholder="Ex: Supermercado, Salário…"/></div>
     <div class="form-row">
       <div class="field" style="margin-bottom:0"><label>Categoria</label><select id="f-cat"></select></div>
-      <div class="field" style="margin-bottom:0" id="cartao-wrap"><label>Cartão / Forma</label><select id="f-cartao" onchange="onCartaoChange()"></select></div>
-    </div>
-    <!-- À vista ou Parcelado -->
-    <div id="pagamento-wrap" style="display:none;margin-top:12px">
-      <div class="field" style="margin-bottom:0">
-        <label>Forma de pagamento</label>
-        <div class="type-toggle">
-          <button class="type-btn on-r" id="btn-avista" onclick="setFormaPgto('avista')">💳 À vista</button>
-          <button class="type-btn" id="btn-parcelado" onclick="setFormaPgto('parcelado')">📅 Parcelado</button>
-        </div>
-      </div>
-      <!-- Campos parcelado -->
-      <div id="parc-inline-wrap" style="display:none;margin-top:12px">
-        <div class="form-row">
-          <div class="field" style="margin-bottom:0">
-            <label>Número de parcelas</label>
-            <input type="number" id="f-parc-num" placeholder="Ex: 12" min="2" max="360" oninput="calcParcelaInline()"/>
-          </div>
-          <div class="field" style="margin-bottom:0">
-            <label>Valor da parcela (R$)</label>
-            <input type="number" id="f-parc-val" placeholder="Calculado auto" readonly style="background:var(--bg4);color:var(--accent)"/>
-          </div>
-        </div>
-        <div class="form-row" style="margin-top:8px">
-          <div class="field" style="margin-bottom:0">
-            <label>Mês da 1ª parcela</label>
-            <input type="month" id="f-parc-inicio"/>
-          </div>
-          <div class="field" style="margin-bottom:0">
-            <label>Dia do vencimento</label>
-            <input type="number" id="f-parc-dia" placeholder="Ex: 10" min="1" max="31"/>
-          </div>
-        </div>
-        <div style="margin-top:8px;padding:10px 14px;background:var(--amber-bg);border-radius:var(--r10);font-size:12px;color:var(--amber)">
-          💡 O parcelamento será criado automaticamente e aparecerá em cada mês até a última parcela.
-        </div>
-      </div>
+      <div class="field" style="margin-bottom:0" id="cartao-wrap"><label>Cartão / Forma</label><select id="f-cartao"></select></div>
     </div>
     <div style="margin-top:16px"><button class="btn btn-accent btn-full" id="btn-add" onclick="addTxn()">+ Adicionar lançamento</button></div>
   </div>
@@ -357,8 +284,50 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
   </div>
 </div>
 
+<div id="view-patrimonio" class="view">
+  <p class="page-title">Patrimônio & Dívidas</p>
+  <div class="g4 mb20" id="patr-metrics"></div>
+  <div class="g2">
+    <div class="card" style="height:fit-content">
+      <div class="card-title" id="p-form-title">Adicionar item</div>
+      <div class="field"><label>Tipo</label><select id="p-tipo" onchange="onPatrTipo()">
+        <option value="investimento">📈 Investimento</option>
+        <option value="imovel">🏠 Imóvel</option>
+        <option value="veiculo">🚗 Veículo</option>
+        <option value="consorcio">📋 Consórcio</option>
+        <option value="financiamento">🏦 Financiamento</option>
+        <option value="parcelamento">💳 Parcelamento</option>
+        <option value="emprestimo">💸 Empréstimo</option>
+      </select></div>
+      <div class="field"><label>Descrição</label><input type="text" id="p-desc" placeholder="Ex: Tesouro Selic, Apto Centro, Carro…"/></div>
+      <div class="form-row">
+        <div class="field" style="margin-bottom:0"><label id="p-val-label">Valor total (R$)</label><input type="number" id="p-val" placeholder="0,00" min="0" step="0.01"/></div>
+        <div class="field" style="margin-bottom:0" id="p-parcela-wrap"><label>Parcela mensal (R$)</label><input type="number" id="p-parcela" placeholder="0,00" min="0" step="0.01"/></div>
+      </div>
+      <div class="form-row" id="p-parcelas-row">
+        <div class="field" style="margin-bottom:0"><label>Parcelas pagas</label><input type="number" id="p-pagas" placeholder="0" min="0" step="1"/></div>
+        <div class="field" style="margin-bottom:0"><label>Total de parcelas</label><input type="number" id="p-total-parc" placeholder="0" min="0" step="1"/></div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px"><button class="btn btn-accent btn-full" id="p-save-btn" onclick="savePatr()">+ Adicionar ao patrimônio</button><button class="btn btn-ghost" id="p-cancel-btn" onclick="cancelEditPatr()" style="display:none">Cancelar</button></div>
+    </div>
+    <div>
+      <div class="card mb14">
+        <div class="card-title">💰 O que eu tenho (ativos)</div>
+        <div id="patr-ativos"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📉 O que eu devo (dívidas)</div>
+        <div id="patr-dividas"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="view-relatorio" class="view">
-  <p class="page-title">Relatório</p>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <p class="page-title" style="margin-bottom:0">Relatório</p>
+    <button class="btn btn-ghost btn-sm no-print" onclick="imprimirRelatorio()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir</button>
+  </div>
   <div id="relatorio-content"></div>
 </div>
 
@@ -369,15 +338,10 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
       <div class="card mb14">
         <div class="card-title">Meus cartões</div>
         <div id="cfg-cartoes"></div>
-        <div style="display:grid;grid-template-columns:1fr 80px 80px auto auto;gap:8px;margin-top:12px;align-items:center">
-          <input type="text" id="nc-nome" placeholder="Nome do cartão" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r10);padding:9px 14px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text)"/>
-          <input type="number" id="nc-fecha" placeholder="Fecha dia" min="1" max="31" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r10);padding:9px 10px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);text-align:center"/>
-          <input type="number" id="nc-vence" placeholder="Vence dia" min="1" max="31" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r10);padding:9px 10px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);text-align:center"/>
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+          <input type="text" id="nc-nome" placeholder="Nome do cartão" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r10);padding:9px 14px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text)"/>
           <input type="color" id="nc-cor" value="#C8F060" style="width:38px;height:38px;border:1px solid var(--border);border-radius:var(--r6);padding:2px;background:var(--bg3);cursor:pointer"/>
           <button class="btn btn-ghost btn-sm" onclick="addCartao()">+ Add</button>
-        </div>
-        <div style="font-size:10px;color:var(--text3);margin-top:6px;display:grid;grid-template-columns:1fr 80px 80px auto auto;gap:8px">
-          <span></span><span style="text-align:center">Fechamento</span><span style="text-align:center">Vencimento</span><span></span><span></span>
         </div>
       </div>
       <div class="card mb14">
@@ -413,67 +377,13 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
     </div>
   </div>
 </div>
-
-<div id="view-patrimonio" class="view">
-  <p class="page-title">Patrimônio</p>
-
-  <!-- BALANÇO GERAL -->
-  <div id="balanco-wrap" class="mb20"></div>
-
-  <!-- TABS patrimônio -->
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px" id="pat-tabs">
-    <button class="btn btn-accent btn-sm" onclick="setPatTab('imoveis',this)">🏠 Imóveis</button>
-    <button class="btn btn-ghost btn-sm" onclick="setPatTab('veiculos',this)">🚗 Veículos</button>
-    <button class="btn btn-ghost btn-sm" onclick="setPatTab('consorcios',this)">🎯 Consórcios</button>
-    <button class="btn btn-ghost btn-sm" onclick="setPatTab('investimentos',this)">💎 Investimentos</button>
-    <button class="btn btn-ghost btn-sm" onclick="setPatTab('emprestimos',this)">🏦 Empréstimos</button>
-  </div>
-
-  <div id="pat-content"></div>
-</div>
-
-<div id="view-parcelados" class="view">
-  <p class="page-title">Parcelamentos</p>
-
-  <!-- FORM novo parcelamento -->
-  <div class="parc-form mb14">
-    <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:6px">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Nova compra parcelada
-    </div>
-    <div class="form-row" style="margin-bottom:10px">
-      <div class="field" style="margin-bottom:0"><label>Descrição</label><input type="text" id="parc-desc" placeholder="Ex: TV Samsung, Sofá..."/></div>
-      <div class="field" style="margin-bottom:0"><label>Valor total (R$)</label><input type="number" id="parc-total" placeholder="0,00" min="0" step="0.01" oninput="calcParcela()"/></div>
-    </div>
-    <div class="form-row" style="margin-bottom:10px">
-      <div class="field" style="margin-bottom:0"><label>Nº de parcelas</label><input type="number" id="parc-num" placeholder="Ex: 12" min="1" max="360" oninput="calcParcela()"/></div>
-      <div class="field" style="margin-bottom:0"><label>Valor da parcela (R$)</label><input type="number" id="parc-val" placeholder="Calculado auto" step="0.01" readonly style="background:var(--bg4);color:var(--accent)"/></div>
-    </div>
-    <div class="form-row" style="margin-bottom:10px">
-      <div class="field" style="margin-bottom:0"><label>Mês inicial</label><input type="month" id="parc-inicio"/></div>
-      <div class="field" style="margin-bottom:0"><label>Dia do vencimento</label><input type="number" id="parc-dia" placeholder="Ex: 10" min="1" max="31"/></div>
-    </div>
-    <div class="form-row" style="margin-bottom:14px">
-      <div class="field" style="margin-bottom:0"><label>Categoria</label><select id="parc-cat"></select></div>
-      <div class="field" style="margin-bottom:0"><label>Cartão</label><select id="parc-cartao"></select></div>
-    </div>
-    <button class="btn btn-accent" onclick="addParcelamento()">+ Adicionar parcelamento</button>
-  </div>
-
-  <!-- LISTA de parcelamentos -->
-  <div class="card">
-    <div class="card-title">Parcelamentos ativos</div>
-    <div id="parc-lista"></div>
-  </div>
-</div>
 </main>
 
 <nav class="bottom-nav">
   <button class="bnav-item active" data-view="dash" onclick="goView('dash',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Home</button>
   <button class="bnav-item" data-view="lancar" onclick="goView('lancar',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Lançar</button>
-  <button class="bnav-item" data-view="faturas" onclick="goView('faturas',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Faturas</button>
+  <button class="bnav-item" data-view="patrimonio" onclick="goView('patrimonio',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>Patrim.</button>
   <button class="bnav-item" data-view="txns" onclick="goView('txns',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Histórico</button>
-  <button class="bnav-item" data-view="patrimonio" onclick="goView('patrimonio',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>Patrimônio</button>
   <button class="bnav-item" data-view="config" onclick="goView('config',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Config</button>
 </nav>
 </div>
@@ -536,7 +446,11 @@ const api = {
   },
   async setConfig(chave,valor){
     return sbFetch("configuracoes?chave=eq."+chave, {method:"PATCH",body:JSON.stringify({valor:""+valor})});
-  }
+  },
+  async getPatr(){ return sbFetch("patrimonio?order=criado_em.asc") },
+  async addPatr(d){ return sbFetch("patrimonio", {method:"POST",body:JSON.stringify(d)}) },
+  async updPatr(id,d){ return sbFetch("patrimonio?id=eq."+id, {method:"PATCH",body:JSON.stringify(d)}) },
+  async delPatr(id){ return sbFetch("patrimonio?id=eq."+id, {method:"DELETE",prefer:""}) }
 };
 
 // ══════════════════════════════════
@@ -555,7 +469,7 @@ const CATS_DEFAULT_D=[
 ];
 const CARTOES_DEFAULT=[{nome:"Santander",cor:"#EF4444"},{nome:"Inter",cor:"#F59E0B"}];
 
-let DB = { txns:[], cartoes:[], catsR:[], catsD:[], orcs:[], metaPoupanca:20 };
+let DB = { txns:[], cartoes:[], catsR:[], catsD:[], orcs:[], patr:[], metaPoupanca:20 };
 let cur = {y:new Date().getFullYear(), m:new Date().getMonth()};
 let tipo = "r", curView = "dash", txnFilter = "todos";
 
@@ -613,13 +527,14 @@ async function init(){
     document.getElementById("cartao-wrap").style.display="none";
 
     // Carregar tudo em paralelo
-    const [txns,cartoes,catsR,catsD,orcs,metaCfg] = await Promise.all([
+    const [txns,cartoes,catsR,catsD,orcs,metaCfg,patr] = await Promise.all([
       api.getTxns(),
       api.getCartoes(),
       api.getCats("r"),
       api.getCats("d"),
       api.getOrcs(),
-      api.getConfig("meta_poupanca")
+      api.getConfig("meta_poupanca"),
+      api.getPatr().catch(()=>[])
     ]);
 
     // Se não tem categorias ainda, criar defaults
@@ -641,6 +556,7 @@ async function init(){
 
     DB.txns = txns;
     DB.orcs = orcs;
+    DB.patr = patr||[];
     DB.metaPoupanca = parseInt(metaCfg)||20;
 
     setSyncStatus("ok");
@@ -657,7 +573,7 @@ async function init(){
 // ══════════════════════════════════
 //  NAVIGATION
 // ══════════════════════════════════
-const VTITLES={dash:"Dashboard",lancar:"Novo Lançamento",parcelados:"Parcelamentos",faturas:"Faturas",txns:"Transações",relatorio:"Relatório",patrimonio:"Patrimônio",config:"Configurações"}
+const VTITLES={dash:"Dashboard",lancar:"Novo Lançamento",faturas:"Faturas",txns:"Transações",patrimonio:"Patrimônio & Dívidas",relatorio:"Relatório",config:"Configurações"}
 function chM(d){
   cur.m+=d;
   if(cur.m>11){cur.m=0;cur.y++}
@@ -681,43 +597,7 @@ function setTipo(t){
   document.getElementById("btn-r").className="type-btn"+(t==="r"?" on-r":"");
   document.getElementById("btn-d").className="type-btn"+(t==="d"?" on-d":"");
   document.getElementById("cartao-wrap").style.display=t==="d"?"":"none";
-  document.getElementById("pagamento-wrap").style.display=t==="d"?"":"none";
-  if(t==="r"){setFormaPgto("avista")}
   fillSelects();
-}
-
-let formaPgto="avista";
-function setFormaPgto(f){
-  formaPgto=f;
-  document.getElementById("btn-avista").className="type-btn"+(f==="avista"?" on-r":"");
-  document.getElementById("btn-parcelado").className="type-btn"+(f==="parcelado"?" on-d":"");
-  document.getElementById("parc-inline-wrap").style.display=f==="parcelado"?"":"none";
-  if(f==="parcelado"){
-    const hoje=new Date();
-    const mesAtual=hoje.getFullYear()+"-"+String(hoje.getMonth()+1).padStart(2,"0");
-    const el=document.getElementById("f-parc-inicio");
-    if(el&&!el.value)el.value=mesAtual;
-    // Pre-fill dia vencimento from selected cartao
-    const cartaoId=document.getElementById("f-cartao").value;
-    const cartao=DB.cartoes.find(c=>c.id===cartaoId);
-    const diaEl=document.getElementById("f-parc-dia");
-    if(diaEl&&cartao&&cartao.dia_vencimento)diaEl.value=cartao.dia_vencimento;
-  }
-}
-function onCartaoChange(){
-  if(formaPgto==="parcelado"){
-    const cartaoId=document.getElementById("f-cartao").value;
-    const cartao=DB.cartoes.find(c=>c.id===cartaoId);
-    const diaEl=document.getElementById("f-parc-dia");
-    if(diaEl&&cartao&&cartao.dia_vencimento)diaEl.value=cartao.dia_vencimento;
-  }
-}
-function calcParcelaInline(){
-  const val=parseFloat(document.getElementById("f-val").value)||0;
-  const num=parseInt(document.getElementById("f-parc-num").value)||0;
-  if(val>0&&num>0){
-    document.getElementById("f-parc-val").value=(val/num).toFixed(2);
-  }
 }
 function fillSelects(){
   const cats=tipo==="r"?DB.catsR:DB.catsD;
@@ -733,36 +613,6 @@ async function addTxn(){
   if(!descricao){toast("⚠ Digite uma descrição");return}
   if(!valor||valor<=0){toast("⚠ Digite um valor válido");return}
   if(!data){toast("⚠ Escolha a data");return}
-
-  // Se for parcelado no cartão, cria parcelamento automático
-  if(tipo==="d"&&formaPgto==="parcelado"){
-    const num=parseInt(document.getElementById("f-parc-num").value);
-    const inicio=document.getElementById("f-parc-inicio").value;
-    const dia=parseInt(document.getElementById("f-parc-dia").value)||10;
-    if(!num||num<2){toast("⚠ Digite o número de parcelas");return}
-    if(!inicio){toast("⚠ Escolha o mês da 1ª parcela");return}
-    const valParcela=parseFloat((valor/num).toFixed(2));
-    const [ano,mes]=inicio.split("-").map(Number);
-    parcDB.push({
-      id:"p"+Date.now(),
-      desc:descricao,valor_total:valor,num_parcelas:num,
-      valor_parcela:valParcela,
-      ano_inicio:ano,mes_inicio:mes,
-      dia_vencimento:dia,cat:categoria_id,cartao:cartao_id,
-      ativo:true,criado_em:new Date().toISOString()
-    });
-    saveParc();
-    document.getElementById("f-desc").value="";
-    document.getElementById("f-val").value="";
-    document.getElementById("f-parc-num").value="";
-    document.getElementById("f-parc-val").value="";
-    setFormaPgto("avista");
-    toast("✅ "+descricao+" parcelado em "+num+"x de "+brl(valParcela)+" — aparece automaticamente em cada mês!");
-    render();
-    return;
-  }
-
-  // À vista — lançamento normal
   const btn=document.getElementById("btn-add");
   btn.disabled=true;btn.textContent="Salvando...";
   setSyncStatus("loading");
@@ -791,17 +641,13 @@ async function deleteTxn(id){
 async function addCartao(){
   const nome=document.getElementById("nc-nome").value.trim();
   const cor=document.getElementById("nc-cor").value;
-  const dia_fechamento=parseInt(document.getElementById("nc-fecha").value)||20;
-  const dia_vencimento=parseInt(document.getElementById("nc-vence").value)||5;
   if(!nome){toast("⚠ Digite o nome");return}
   setSyncStatus("loading");
   try{
-    const [novo]=await api.addCartao({nome,cor,dia_fechamento,dia_vencimento});
+    const [novo]=await api.addCartao({nome,cor});
     DB.cartoes.push(novo);
     document.getElementById("nc-nome").value="";
-    document.getElementById("nc-fecha").value="";
-    document.getElementById("nc-vence").value="";
-    setSyncStatus("ok");toast("✅ Cartão "+nome+" adicionado! Fecha dia "+dia_fechamento+", vence dia "+dia_vencimento);render();
+    setSyncStatus("ok");toast("✅ Cartão "+nome+" adicionado!");render();
   }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
 }
 async function removeCartao(id){
@@ -810,18 +656,6 @@ async function removeCartao(id){
     await api.delCartao(id);
     DB.cartoes=DB.cartoes.filter(c=>c.id!==id);
     setSyncStatus("ok");render();
-  }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
-}
-async function updateCartaoCiclo(id,campo,val){
-  const idx=DB.cartoes.findIndex(c=>c.id===id);
-  if(idx<0)return;
-  DB.cartoes[idx][campo]=parseInt(val)||0;
-  setSyncStatus("loading");
-  try{
-    await sbFetch("cartoes?id=eq."+id,{method:"PATCH",body:JSON.stringify({[campo]:parseInt(val)||0})});
-    setSyncStatus("ok");
-    toast("✅ Ciclo do cartão atualizado!");
-    render();
   }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
 }
 async function addCat(tc){
@@ -867,6 +701,126 @@ async function saveConfig(chave,valor){
 }
 
 // ══════════════════════════════════
+//  PATRIMÔNIO
+// ══════════════════════════════════
+const PATR_TIPOS={
+  investimento:{icon:"📈",label:"Investimento",ativo:true},
+  imovel:{icon:"🏠",label:"Imóvel",ativo:true},
+  veiculo:{icon:"🚗",label:"Veículo",ativo:true},
+  consorcio:{icon:"📋",label:"Consórcio",ativo:false},
+  financiamento:{icon:"🏦",label:"Financiamento",ativo:false},
+  parcelamento:{icon:"💳",label:"Parcelamento",ativo:false},
+  emprestimo:{icon:"💸",label:"Empréstimo",ativo:false}
+};
+function isParcelado(tipo){return["consorcio","financiamento","parcelamento","emprestimo"].includes(tipo)}
+function onPatrTipo(){
+  const tipo=document.getElementById("p-tipo").value;
+  const parc=isParcelado(tipo);
+  document.getElementById("p-parcela-wrap").style.display=parc?"":"none";
+  document.getElementById("p-parcelas-row").style.display=parc?"":"none";
+  document.getElementById("p-val-label").textContent=parc?"Valor total da dívida (R$)":"Valor atual (R$)";
+}
+// soma das parcelas mensais ainda a pagar (dívidas ativas)
+function parcelasMensais(){
+  return DB.patr.filter(p=>isParcelado(p.tipo)).reduce((s,p)=>{
+    const pagas=Number(p.parcelas_pagas||0), tot=Number(p.parcelas_total||0);
+    if(tot>0 && pagas>=tot)return s; // quitado
+    return s+Number(p.parcela_mensal||0);
+  },0);
+}
+let editPatrId=null; // null = adicionando; id = editando
+function patrFormData(){
+  const tipo=document.getElementById("p-tipo").value;
+  const descricao=document.getElementById("p-desc").value.trim();
+  const valor=parseFloat(document.getElementById("p-val").value)||0;
+  const parc=isParcelado(tipo);
+  return {
+    tipo,descricao,valor,
+    parcela_mensal:parc?(parseFloat(document.getElementById("p-parcela").value)||0):0,
+    parcelas_pagas:parc?(parseInt(document.getElementById("p-pagas").value)||0):0,
+    parcelas_total:parc?(parseInt(document.getElementById("p-total-parc").value)||0):0
+  };
+}
+function clearPatrForm(){
+  document.getElementById("p-desc").value="";document.getElementById("p-val").value="";
+  document.getElementById("p-parcela").value="";document.getElementById("p-pagas").value="";document.getElementById("p-total-parc").value="";
+}
+async function savePatr(){
+  const d=patrFormData();
+  if(!d.descricao){toast("⚠ Digite uma descrição");return}
+  if(!d.valor||d.valor<=0){toast("⚠ Digite um valor válido");return}
+  setSyncStatus("loading");
+  try{
+    if(editPatrId){
+      const [upd]=await api.updPatr(editPatrId,d);
+      const idx=DB.patr.findIndex(p=>p.id===editPatrId);
+      if(idx>=0)DB.patr[idx]=upd||{...DB.patr[idx],...d};
+      cancelEditPatr();
+      setSyncStatus("ok");toast("✅ "+PATR_TIPOS[d.tipo].label+" atualizado!");render();
+    } else {
+      const [novo]=await api.addPatr(d);
+      DB.patr.push(novo);
+      clearPatrForm();
+      setSyncStatus("ok");toast("✅ "+PATR_TIPOS[d.tipo].label+" adicionado!");render();
+    }
+  }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message+" — rodou o SQL da tabela patrimonio?",5000)}
+}
+function editPatr(id){
+  const p=DB.patr.find(x=>x.id===id);if(!p)return;
+  editPatrId=id;
+  document.getElementById("p-tipo").value=p.tipo;
+  document.getElementById("p-desc").value=p.descricao;
+  document.getElementById("p-val").value=p.valor;
+  document.getElementById("p-parcela").value=p.parcela_mensal||"";
+  document.getElementById("p-pagas").value=p.parcelas_pagas||"";
+  document.getElementById("p-total-parc").value=p.parcelas_total||"";
+  onPatrTipo();
+  document.getElementById("p-form-title").textContent="✏️ Editando: "+p.descricao;
+  document.getElementById("p-save-btn").textContent="Salvar alterações";
+  document.getElementById("p-cancel-btn").style.display="";
+  document.getElementById("p-tipo").scrollIntoView({behavior:"smooth",block:"center"});
+}
+function cancelEditPatr(){
+  editPatrId=null;
+  clearPatrForm();
+  document.getElementById("p-form-title").textContent="Adicionar item";
+  document.getElementById("p-save-btn").textContent="+ Adicionar ao patrimônio";
+  document.getElementById("p-cancel-btn").style.display="none";
+}
+async function delPatr(id){
+  setSyncStatus("loading");
+  try{
+    await api.delPatr(id);
+    DB.patr=DB.patr.filter(p=>p.id!==id);
+    if(editPatrId===id)cancelEditPatr();
+    setSyncStatus("ok");toast("🗑 Removido");render();
+  }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
+}
+function renderPatr(){
+  const ativos=DB.patr.filter(p=>PATR_TIPOS[p.tipo]&&PATR_TIPOS[p.tipo].ativo);
+  const dividas=DB.patr.filter(p=>p.tipo&&isParcelado(p.tipo));
+  const totalAtivos=ativos.reduce((s,p)=>s+Number(p.valor),0);
+  // saldo devedor = parcelas que faltam × parcela mensal (ou valor total se sem parcelas)
+  const totalDividas=dividas.reduce((s,p)=>{
+    const pagas=Number(p.parcelas_pagas||0),tot=Number(p.parcelas_total||0),pm=Number(p.parcela_mensal||0);
+    if(tot>0){const faltam=Math.max(0,tot-pagas);return s+faltam*pm}
+    return s+Number(p.valor)
+  },0);
+  const liquido=totalAtivos-totalDividas;
+  const mensal=parcelasMensais();
+  document.getElementById("patr-metrics").innerHTML=`
+    <div class="metric"><div class="metric-label">Ativos</div><div class="metric-val" style="color:var(--green)">${brl(totalAtivos)}</div><div class="metric-sub">o que eu tenho</div></div>
+    <div class="metric"><div class="metric-label">Dívidas</div><div class="metric-val" style="color:var(--red)">${brl(totalDividas)}</div><div class="metric-sub">saldo devedor</div></div>
+    <div class="metric"><div class="metric-label">Patrimônio líquido</div><div class="metric-val" style="color:${liquido>=0?"var(--green)":"var(--red)"}">${brl(liquido)}</div><div class="metric-sub">ativos − dívidas</div></div>
+    <div class="metric"><div class="metric-label">Parcelas/mês</div><div class="metric-val" style="color:var(--amber)">${brl(mensal)}</div><div class="metric-sub">compromisso fixo</div></div>`;
+  const rowAtivo=p=>{const t=PATR_TIPOS[p.tipo];return`<div class="list-row"><div style="font-size:22px;flex-shrink:0">${t.icon}</div><div class="row-body"><div class="row-name">${p.descricao}</div><div class="row-meta">${t.label}</div></div><div class="row-val" style="color:var(--green)">${brl(p.valor)}</div><button class="row-edit" onclick="editPatr('${p.id}')" title="Editar">✏️</button><button class="row-del" onclick="delPatr('${p.id}')">×</button></div>`};
+  const rowDivida=p=>{const t=PATR_TIPOS[p.tipo];const pagas=Number(p.parcelas_pagas||0),tot=Number(p.parcelas_total||0),pm=Number(p.parcela_mensal||0);const faltam=tot>0?Math.max(0,tot-pagas):0;const quitado=tot>0&&pagas>=tot;const saldo=tot>0?faltam*pm:Number(p.valor);const prog=tot>0?Math.round(pagas/tot*100):0;return`<div class="list-row"><div style="font-size:22px;flex-shrink:0">${t.icon}</div><div class="row-body"><div class="row-name">${p.descricao}${quitado?` <span class="badge badge-green" style="font-size:9px">quitado</span>`:""}</div><div class="row-meta">${t.label}${tot>0?` · ${pagas}/${tot} parcelas de ${brl(pm)}`:""}</div>${tot>0?`<div class="prog-wrap" style="height:4px"><div class="prog-fill" style="width:${prog}%;background:${quitado?"var(--green)":"var(--amber)"}"></div></div>`:""}</div><div class="row-val" style="color:${quitado?"var(--text3)":"var(--red)"}">${brl(saldo)}</div><button class="row-edit" onclick="editPatr('${p.id}')" title="Editar">✏️</button><button class="row-del" onclick="delPatr('${p.id}')">×</button></div>`};
+  document.getElementById("patr-ativos").innerHTML=ativos.length?ativos.map(rowAtivo).join(""):`<div class="empty"><div class="empty-icon">💰</div>Nenhum ativo cadastrado</div>`;
+  document.getElementById("patr-dividas").innerHTML=dividas.length?dividas.map(rowDivida).join(""):`<div class="empty"><div class="empty-icon">📉</div>Nenhuma dívida cadastrada</div>`;
+}
+function imprimirRelatorio(){window.print()}
+
+// ══════════════════════════════════
 //  RENDER
 // ══════════════════════════════════
 function render(){
@@ -881,11 +835,10 @@ function render(){
   if(curView==="dash")renderDash(txns,rec,desp,saldo);
   if(curView==="lancar"){fillSelects();setTipo(tipo)}
   if(curView==="faturas")renderFaturas(txns);
+  if(curView==="patrimonio")renderPatr();
   if(curView==="txns")renderTxns(txns,ml);
   if(curView==="relatorio")renderRelatorio(txns,rec,desp,saldo);
   if(curView==="config")renderConfig();
-  if(curView==="patrimonio")renderPatrimonio();
-  if(curView==="parcelados")renderParcelados();
 }
 
 function renderDash(txns,rec,desp,saldo){
@@ -893,23 +846,28 @@ function renderDash(txns,rec,desp,saldo){
   const despTxns=txns.filter(t=>t.tipo==="d");
   const totalOrc=DB.orcs.reduce((s,o)=>s+Number(o.valor),0);
   const poupPct=DB.metaPoupanca||20;
+  const parcMensal=parcelasMensais();
   let eqHtml="";
-  if(totalOrc>0){
-    const eq=totalOrc/(1-(poupPct/100));
-    const diff=rec-eq;const ok=rec>=eq;const close=!ok&&rec>=eq*0.9;
-    const badge=ok?`<span class="badge badge-green">✓ +${brl(Math.abs(diff))}</span>`:close?`<span class="badge badge-amber">⚡ Faltam ${brl(Math.abs(diff))}</span>`:`<span class="badge badge-red">⚠ Déficit ${brl(Math.abs(diff))}</span>`;
+  // Compromisso total a pagar = orçamento de gastos + parcelas/financiamentos do mês
+  const compromisso=totalOrc+parcMensal;
+  if(compromisso>0){
+    // ponto de equilíbrio: precisa cobrir compromisso E ainda guardar a poupança
+    const eq=compromisso/(1-(poupPct/100));
+    const diff=rec-eq;          // quanto sobra (+) ou falta (-)
+    const precisaGanhar=Math.max(0,eq-rec); // quanto falta ganhar pra zerar
+    const ok=rec>=eq;const close=!ok&&rec>=eq*0.9;
+    const badge=ok?`<span class="badge badge-green">✓ Sobra ${brl(Math.abs(diff))}</span>`:close?`<span class="badge badge-amber">⚡ Faltam ${brl(precisaGanhar)}</span>`:`<span class="badge badge-red">⚠ Faltam ${brl(precisaGanhar)}</span>`;
     eqHtml=`<div class="eq-card"><div class="eq-title">⚖ Ponto de equilíbrio financeiro</div>
     <div class="eq-grid">
-      <div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Mínimo necessário</div><div class="eq-main">${brl(eq)}</div><div style="font-size:11px;color:var(--text3);margin-top:4px">orçamentos + ${poupPct}% poupança</div></div>
-      <div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Receita do mês</div><div style="font-size:24px;font-weight:700;color:${ok?"var(--green)":"var(--red)"}">${brl(rec)}</div></div>
-      <div>${badge}</div>
+      <div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Preciso ganhar (mínimo)</div><div class="eq-main">${brl(eq)}</div><div style="font-size:11px;color:var(--text3);margin-top:4px">contas ${brl(totalOrc)} + parcelas ${brl(parcMensal)} + ${poupPct}% poupança</div></div>
+      <div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Receita do mês</div><div style="font-size:24px;font-weight:700;color:${ok?"var(--green)":"var(--red)"}">${brl(rec)}</div><div style="font-size:11px;color:var(--text3);margin-top:4px">${ok?"acima do equilíbrio":"abaixo do equilíbrio"}</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:var(--text2);margin-bottom:6px">${ok?"Sobra no mês":"Falta ganhar"}</div><div style="font-size:22px;font-weight:700;color:${ok?"var(--green)":"var(--red)"};margin-bottom:8px">${ok?"+"+brl(Math.abs(diff)):brl(precisaGanhar)}</div>${badge}</div>
     </div></div>`;
   } else {
     eqHtml=`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r14);padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:10px">
-      <span style="font-size:20px">💡</span>Configure os <strong style="color:var(--accent);cursor:pointer" onclick="goView('config',document.querySelector('[data-view=config]'))">orçamentos por categoria</strong> para ver seu ponto de equilíbrio.
+      <span style="font-size:20px">💡</span>Configure os <strong style="color:var(--accent);cursor:pointer" onclick="goView('config',document.querySelector('[data-view=config]'))">orçamentos por categoria</strong> ou cadastre <strong style="color:var(--accent);cursor:pointer" onclick="goView('patrimonio',document.querySelector('[data-view=patrimonio]'))">parcelamentos</strong> para ver seu ponto de equilíbrio.
     </div>`;
   }
-  renderCompromissos(txns);
   document.getElementById("eq-wrap").innerHTML=eqHtml;
   document.getElementById("metrics").innerHTML=`
     <div class="metric"><div class="metric-label">Receitas</div><div class="metric-val" style="color:var(--green)">${brl(rec)}</div><div class="metric-sub">neste mês</div></div>
@@ -932,165 +890,17 @@ function renderDash(txns,rec,desp,saldo){
   } else {document.getElementById("dash-orc").style.display="none"}
 }
 
-function getFaturaPeriodo(cartao){
-  // Retorna período da fatura baseado no ciclo do cartão
-  const fecha=cartao.dia_fechamento||20;
-  const vence=cartao.dia_vencimento||5;
-  const hoje=new Date();
-  const diaHoje=hoje.getDate();
-  const mesRef=cur.m; // 0-indexed
-  const anoRef=cur.y;
-
-  // Fatura ATUAL: do fechamento do mês anterior até o fechamento deste mês
-  let inicioAtual=new Date(anoRef,mesRef-1,fecha+1);
-  let fimAtual=new Date(anoRef,mesRef,fecha);
-
-  // Data de vencimento da fatura atual
-  let vencAtual=new Date(anoRef,mesRef+1,vence); // vence no mês seguinte
-
-  return{inicioAtual,fimAtual,vencAtual,fecha,vence};
-}
-
-function getTxnsFatura(allTxns,cartaoId,inicio,fim){
-  return allTxns.filter(t=>{
-    if(t.cartao_id!==cartaoId||t.tipo!=="d")return false;
-    if(t.sintetico)return false;
-    const d=new Date(t.data+"T12:00:00");
-    return d>=inicio&&d<=fim;
-  });
-}
-
-function renderFaturaCard(c,items,label,vencimento,cor_label,faturaAno,faturasMes){
-  if(!items.length)return"";
-  const total=items.reduce((s,t)=>s+Number(t.valor),0);
-  const byCat={};items.forEach(t=>{byCat[t.categoria_id]=(byCat[t.categoria_id]||0)+Number(t.valor)});
-  const vencStr=vencimento?vencimento.toLocaleDateString("pt-BR",{day:"2-digit",month:"short",year:"numeric"}):"";
-  const paga=isFaturaPaga(c.id,faturaAno,faturasMes);
-  const pagaEm=paga&&faturasDB[getFaturaKey(c.id,faturaAno,faturasMes)]?new Date(faturasDB[getFaturaKey(c.id,faturaAno,faturasMes)].pago_em).toLocaleDateString("pt-BR"):"";
-  return`<div class="fatura-card${paga?" paga":""}" style="border-top:3px solid ${c.cor}">
-    <div class="fatura-head">
-      <div class="fatura-head-left">
-        <div class="fatura-dot" style="background:${c.cor}"></div>
-        <div>
-          <div class="fatura-nome">${c.nome}</div>
-          <div class="fatura-count" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px">
-            <span style="background:${cor_label}22;color:${cor_label};padding:1px 8px;border-radius:99px;font-size:10px;font-weight:600">${label}</span>
-            ${vencStr?`<span style="color:var(--text2);font-size:11px">Vence ${vencStr}</span>`:""}
-            ${paga?(()=>{
-          const pd=faturasDB[getFaturaKey(c.id,faturaAno,faturasMes)];
-          const atraso=pd&&pd.dias_atraso>0;
-          const temJuros=pd&&pd.juros>0;
-          return`<span class="fatura-paga-badge">✓ Paga em ${pagaEm}</span>`+
-            (atraso?`<span class="atraso-badge">⏰ ${pd.dias_atraso} dias de atraso</span>`:"") +
-            (temJuros?`<span class="juros-badge">+${brl(pd.juros)} juros</span>`:"");
-        })():`<span class="fatura-pendente-badge">● Pendente</span>`}
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-        <div class="fatura-total" style="color:${c.cor}">${brl(total)}</div>
-        ${paga
-          ? `<button class="btn-despagar" onclick="toggleFaturaPaga('${c.id}',${faturaAno},${faturasMes})">Desfazer</button>`
-          : `<button class="btn-pagar" onclick="toggleFaturaPaga('${c.id}',${faturaAno},${faturasMes})">✓ Marcar como paga</button>`
-        }
-      </div>
-    </div>
-    <div class="fatura-cats">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cid,v])=>{const cat=getCat(cid);return`<div class="fatura-cat-item">${cat.icon} ${cat.nome}: <strong>${brl(v)}</strong></div>`}).join("")}</div>
-    <div class="fatura-items">${items.sort((a,b)=>b.data.localeCompare(a.data)).map(t=>{
-      const d=new Date(t.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
-      const cat=getCat(t.categoria_id);
-      return`<div class="fatura-item"><div class="fatura-item-date">${d}</div><div style="flex:1;min-width:0"><div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.descricao}</div><div style="font-size:11px;color:var(--text2)">${cat.icon} ${cat.nome}</div></div><div class="fatura-item-val">${brl(t.valor)}</div><button class="row-del" onclick="deleteTxn('${t.id}')">×</button></div>`;
-    }).join("")}</div>
-    ${(()=>{
-      if(!paga)return"";
-      const pd=faturasDB[getFaturaKey(c.id,faturaAno,faturasMes)];
-      if(!pd)return"";
-      return`<div class="historico-pag">
-        <div class="historico-pag-title">📋 Detalhes do pagamento</div>
-        <div class="historico-pag-row">
-          <span style="font-size:12px;color:var(--text2);flex:1">Data do pagamento</span>
-          <span style="font-size:12px;font-weight:600">${new Date(pd.pago_em).toLocaleDateString("pt-BR")}</span>
-        </div>
-        <div class="historico-pag-row">
-          <span style="font-size:12px;color:var(--text2);flex:1">Valor pago</span>
-          <span style="font-size:12px;font-weight:600;color:var(--green)">${brl(pd.valor_pago||0)}</span>
-        </div>
-        ${pd.juros>0?`<div class="historico-pag-row">
-          <span style="font-size:12px;color:var(--text2);flex:1">Juros / multa</span>
-          <span style="font-size:12px;font-weight:600;color:var(--red)">${brl(pd.juros)}</span>
-        </div>`:""}
-        ${pd.dias_atraso>0?`<div class="historico-pag-row">
-          <span style="font-size:12px;color:var(--text2);flex:1">Dias de atraso</span>
-          <span style="font-size:12px;font-weight:600;color:var(--amber)">${pd.dias_atraso} dias</span>
-        </div>`:""}
-        ${pd.obs?`<div class="historico-pag-row">
-          <span style="font-size:12px;color:var(--text2);flex:1">Observação</span>
-          <span style="font-size:12px">${pd.obs}</span>
-        </div>`:""}
-      </div>`;
-    })()}
-  </div>`;
-}
-
 function renderFaturas(txns){
-  // Buscar TODAS as transações para calcular faturas corretamente
-  const allTxns=DB.txns;
-  const allC=[...DB.cartoes];
+  const despTxns=txns.filter(t=>t.tipo==="d");
+  const byCartao={};despTxns.forEach(t=>{if(!byCartao[t.cartao_id])byCartao[t.cartao_id]=[];byCartao[t.cartao_id].push(t)});
+  const allC=[{id:"dinheiro",nome:"Dinheiro / Pix",cor:"#4ADE80"},...DB.cartoes];
   let html="";let algum=false;
-
-  // Dinheiro/Pix — sem ciclo de fatura, mostra normal
-  const dinheiroItems=txns.filter(t=>t.cartao_id==="dinheiro"&&t.tipo==="d"&&!t.sintetico);
-  if(dinheiroItems.length){
-    algum=true;
-    const total=dinheiroItems.reduce((s,t)=>s+Number(t.valor),0);
-    const byCat={};dinheiroItems.forEach(t=>{byCat[t.categoria_id]=(byCat[t.categoria_id]||0)+Number(t.valor)});
-    html+=`<div class="fatura-card" style="border-top:3px solid #4ADE80">
-      <div class="fatura-head">
-        <div class="fatura-head-left"><div class="fatura-dot" style="background:#4ADE80"></div><div><div class="fatura-nome">Dinheiro / Pix</div><div class="fatura-count">${dinheiroItems.length} lançamento${dinheiroItems.length>1?"s":""}</div></div></div>
-        <div class="fatura-total" style="color:#4ADE80">${brl(total)}</div>
-      </div>
-      <div class="fatura-cats">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cid,v])=>{const cat=getCat(cid);return`<div class="fatura-cat-item">${cat.icon} ${cat.nome}: <strong>${brl(v)}</strong></div>`}).join("")}</div>
-      <div class="fatura-items">${dinheiroItems.sort((a,b)=>b.data.localeCompare(a.data)).map(t=>{const d=new Date(t.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});const cat=getCat(t.categoria_id);return`<div class="fatura-item"><div class="fatura-item-date">${d}</div><div style="flex:1;min-width:0"><div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.descricao}</div><div style="font-size:11px;color:var(--text2)">${cat.icon} ${cat.nome}</div></div><div class="fatura-item-val">${brl(t.valor)}</div><button class="row-del" onclick="deleteTxn('${t.id}')">×</button></div>`}).join("")}</div>
-    </div>`;
-  }
-
   allC.forEach(c=>{
-    const{inicioAtual,fimAtual,vencAtual,fecha,vence}=getFaturaPeriodo(c);
-
-    // Próxima fatura: do dia fecha+1 deste mês até dia fecha do próximo mês
-    const inicioProx=new Date(cur.y,cur.m,fecha+1);
-    const fimProx=new Date(cur.y,cur.m+1,fecha);
-    const vencProx=new Date(cur.y,cur.m+2,vence);
-
-    const itemsAtual=getTxnsFatura(allTxns,c.id,inicioAtual,fimAtual);
-    const itemsProx=getTxnsFatura(allTxns,c.id,inicioProx,fimProx);
-
-    if(!itemsAtual.length&&!itemsProx.length)return;
-    algum=true;
-
-    // Info do ciclo
-    html+=`<div style="font-size:11px;color:var(--text2);margin-bottom:6px;padding:6px 14px;background:var(--bg3);border-radius:var(--r6);display:inline-flex;gap:12px;align-items:center">
-      <span style="color:${c.cor};font-weight:600">${c.nome}</span>
-      <span>📅 Fecha dia <strong>${fecha}</strong></span>
-      <span>💳 Vence dia <strong>${vence}</strong> do mês seguinte</span>
-    </div>`;
-
-    const anoAtual=fimAtual.getFullYear();
-    const mesAtual2=fimAtual.getMonth()+1;
-    const anoProx=fimProx.getFullYear();
-    const mesProx2=fimProx.getMonth()+1;
-
-    html+=renderFaturaCard(c,itemsAtual,
-      "FATURA ATUAL — pagar em "+vencAtual.toLocaleDateString("pt-BR",{month:"short",year:"numeric"}),
-      vencAtual,"var(--red)",anoAtual,mesAtual2);
-
-    html+=renderFaturaCard(c,itemsProx,
-      "PRÓXIMA FATURA — pagar em "+vencProx.toLocaleDateString("pt-BR",{month:"short",year:"numeric"}),
-      vencProx,"var(--blue)",anoProx,mesProx2);
-
-    html+="<div style='margin-bottom:20px'></div>";
+    const items=byCartao[c.id];if(!items||!items.length)return;algum=true;
+    const total=items.reduce((s,t)=>s+Number(t.valor),0);
+    const byCat={};items.forEach(t=>{byCat[t.categoria_id]=(byCat[t.categoria_id]||0)+Number(t.valor)});
+    html+=`<div class="fatura-card"><div class="fatura-head"><div class="fatura-head-left"><div class="fatura-dot" style="background:${c.cor}"></div><div><div class="fatura-nome">${c.nome}</div><div class="fatura-count">${items.length} lançamento${items.length>1?"s":""}</div></div></div><div class="fatura-total" style="color:${c.cor}">${brl(total)}</div></div><div class="fatura-cats">${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cid,v])=>{const cat=getCat(cid);return`<div class="fatura-cat-item">${cat.icon} ${cat.nome}: <strong>${brl(v)}</strong></div>`}).join("")}</div><div class="fatura-items">${items.sort((a,b)=>b.data.localeCompare(a.data)).map(t=>{const d=new Date(t.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});const cat=getCat(t.categoria_id);return`<div class="fatura-item"><div class="fatura-item-date">${d}</div><div style="flex:1;min-width:0"><div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.descricao}</div><div style="font-size:11px;color:var(--text2)">${cat.icon} ${cat.nome}</div></div><div class="fatura-item-val">${brl(t.valor)}</div><button class="row-del" onclick="deleteTxn('${t.id}')">×</button></div>`}).join("")}</div></div>`;
   });
-
   document.getElementById("faturas-list").innerHTML=algum?html:`<div class="empty" style="padding:60px 0"><div class="empty-icon">💳</div>Nenhuma despesa lançada neste mês.</div>`;
 }
 
@@ -1121,753 +931,13 @@ function renderRelatorio(txns,rec,desp,saldo){
 }
 
 function renderConfig(){
-  document.getElementById("cfg-cartoes").innerHTML=DB.cartoes.map(c=>`<div class="cfg-item">
-    <div style="width:16px;height:16px;border-radius:50%;background:${c.cor};flex-shrink:0"></div>
-    <div class="cfg-item-body">
-      <div>${c.nome}</div>
-      <div style="font-size:11px;color:var(--text2);margin-top:2px">
-        Fecha dia <strong style="color:var(--text)">${c.dia_fechamento||20}</strong> · Vence dia <strong style="color:var(--text)">${c.dia_vencimento||5}</strong> do mês seguinte
-      </div>
-    </div>
-    <div style="display:flex;gap:6px;align-items:center">
-      <div style="text-align:center">
-        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Fecha</div>
-        <input type="number" min="1" max="31" value="${c.dia_fechamento||20}" style="width:44px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r6);padding:4px 6px;font-family:'Sora',sans-serif;font-size:12px;color:var(--text);text-align:center" onchange="updateCartaoCiclo('${c.id}','dia_fechamento',this.value)"/>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">Vence</div>
-        <input type="number" min="1" max="31" value="${c.dia_vencimento||5}" style="width:44px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r6);padding:4px 6px;font-family:'Sora',sans-serif;font-size:12px;color:var(--text);text-align:center" onchange="updateCartaoCiclo('${c.id}','dia_vencimento',this.value)"/>
-      </div>
-      <button class="btn btn-danger btn-sm" onclick="removeCartao('${c.id}')">Remover</button>
-    </div>
-  </div>`).join("")||`<div style="font-size:13px;color:var(--text3);padding:8px 0">Nenhum cartão.</div>`;
+  document.getElementById("cfg-cartoes").innerHTML=DB.cartoes.map(c=>`<div class="cfg-item"><div style="width:16px;height:16px;border-radius:50%;background:${c.cor};flex-shrink:0"></div><div class="cfg-item-body">${c.nome}</div><button class="btn btn-danger btn-sm" onclick="removeCartao('${c.id}')">Remover</button></div>`).join("")||`<div style="font-size:13px;color:var(--text3);padding:8px 0">Nenhum cartão.</div>`;
   document.getElementById("cfg-cats-r").innerHTML=DB.catsR.map(c=>`<div class="cfg-item"><span style="font-size:18px">${c.icon}</span><div class="cfg-item-body">${c.nome}</div><button class="btn btn-danger btn-sm" onclick="removeCat('r','${c.id}')">×</button></div>`).join("");
   document.getElementById("cfg-cats-d").innerHTML=DB.catsD.map(c=>`<div class="cfg-item"><span style="font-size:18px">${c.icon}</span><div class="cfg-item-body">${c.nome}</div><button class="btn btn-danger btn-sm" onclick="removeCat('d','${c.id}')">×</button></div>`).join("");
   document.getElementById("cfg-orcamentos").innerHTML=DB.catsD.map(c=>`<div class="cfg-item"><span style="font-size:18px">${c.icon}</span><div class="cfg-item-body">${c.nome}</div><input class="orc-input" type="number" min="0" step="50" placeholder="R$ 0" value="${getOrc(c.id)||""}" onchange="setOrc('${c.id}',this.value)" oninput="setOrc('${c.id}',this.value)"/></div>`).join("");
 }
 
-
-
-
-// ══════════════════════════════════
-//  FATURAS PAGAS
-// ══════════════════════════════════
-let faturasDB={};
-function loadFaturas(){try{faturasDB=JSON.parse(localStorage.getItem("gf_faturas_pagas")||"{}")}catch{faturasDB={}}}
-function saveFaturas(){localStorage.setItem("gf_faturas_pagas",JSON.stringify(faturasDB))}
-loadFaturas();
-
-function getFaturaKey(cartaoId,ano,mes){return cartaoId+"_"+ano+"_"+mes}
-function isFaturaPaga(cartaoId,ano,mes){return!!faturasDB[getFaturaKey(cartaoId,ano,mes)]}
-function toggleFaturaPaga(cartaoId,ano,mes){
-  const key=getFaturaKey(cartaoId,ano,mes);
-  if(faturasDB[key]){
-    // Já está paga — perguntar se quer desfazer
-    if(window.confirm("Deseja desmarcar esta fatura como paga?")){
-      delete faturasDB[key];
-      saveFaturas();
-      toast("Fatura marcada como pendente");
-      renderFaturas(monthTxns());
-      render();
-    }
-  } else {
-    // Abrir modal de pagamento
-    abrirModalPagar(cartaoId,ano,mes);
-  }
-}
-
-
-function dashPagar(btn){
-  const cartaoId=btn.getAttribute("data-cartao");
-  const ano=parseInt(btn.getAttribute("data-ano"));
-  const mes=parseInt(btn.getAttribute("data-mes"));
-  abrirModalPagar(cartaoId,ano,mes);
-}
-function abrirModalPagar(cartaoId,ano,mes){
-  try{
-    const cartao=getCartao(cartaoId);
-    document.getElementById("mp-cartao-id").value=cartaoId;
-    document.getElementById("mp-ano").value=ano;
-    document.getElementById("mp-mes").value=mes;
-
-    // Calcular total da fatura
-    const c=DB.cartoes.find(c=>c.id===cartaoId)||{dia_fechamento:20,dia_vencimento:5};
-    const fecha=c.dia_fechamento||20;
-    const inicioAtual=new Date(ano,mes-2,fecha+1);
-    const fimAtual=new Date(ano,mes-1,fecha);
-    const items=getTxnsFatura(DB.txns,cartaoId,inicioAtual,fimAtual);
-    const total=items.reduce((s,t)=>s+Number(t.valor),0);
-    const parcMes=getParcMes(ano,mes-1);
-    const totalParc=parcMes.filter(p=>p.cartao===cartaoId).reduce((s,p)=>s+p.valor_parcela,0);
-    const totalGeral=total+totalParc;
-
-    document.getElementById("mp-total").value=totalGeral.toFixed(2);
-    document.getElementById("mp-valor").value=totalGeral.toFixed(2);
-    document.getElementById("mp-data").value=new Date().toISOString().split("T")[0];
-    document.getElementById("mp-obs").value="";
-    document.getElementById("mp-juros-val").value="";
-    document.getElementById("mp-atraso-dias").value="";
-    document.getElementById("modal-pagar-desc").textContent=
-      cartao.nome+" — "+MESES[mes-1]+" "+ano+" — Total: "+brl(totalGeral);
-    setJuros(false);
-    const modalEl=document.getElementById("modal-pagar");
-    if(modalEl){
-      modalEl.style.display="flex";
-    } else {
-      toast("⚠ Modal não encontrado. Recarregue a página.");
-    }
-  }catch(e){
-    console.error("Erro ao abrir modal:",e);
-    toast("⚠ Erro: "+e.message);
-  }
-}
-
-let temJuros=false;
-function setJuros(sim){
-  temJuros=sim;
-  document.getElementById("mp-btn-sem").className="type-btn"+(sim?"":"on-r");
-  document.getElementById("mp-btn-com").className="type-btn"+(sim?" on-d":"");
-  document.getElementById("mp-juros-wrap").style.display=sim?"":"none";
-}
-function calcTotalPagar(){
-  const base=parseFloat(document.getElementById("mp-total").value)||0;
-  const juros=parseFloat(document.getElementById("mp-juros-val").value)||0;
-  document.getElementById("mp-total-juros").textContent=brl(base+juros);
-  document.getElementById("mp-valor").value=(base+juros).toFixed(2);
-}
-async function confirmarPagamento(){
-  const cartaoId=document.getElementById("mp-cartao-id").value;
-  const ano=parseInt(document.getElementById("mp-ano").value);
-  const mes=parseInt(document.getElementById("mp-mes").value);
-  const dataPag=document.getElementById("mp-data").value;
-  const valorPago=parseFloat(document.getElementById("mp-valor").value)||0;
-  const jurosVal=temJuros?parseFloat(document.getElementById("mp-juros-val").value)||0:0;
-  const atrasosDias=temJuros?parseInt(document.getElementById("mp-atraso-dias").value)||0:0;
-  const obs=document.getElementById("mp-obs").value.trim();
-  if(!dataPag){toast("⚠ Informe a data do pagamento");return}
-  if(!valorPago){toast("⚠ Informe o valor pago");return}
-
-  const cartao=getCartao(cartaoId);
-  const key=getFaturaKey(cartaoId,ano,mes);
-
-  // Salvar status de paga
-  faturasDB[key]={
-    pago_em:new Date(dataPag+"T12:00:00").toISOString(),
-    valor_pago:valorPago,
-    juros:jurosVal,
-    dias_atraso:atrasosDias,
-    obs,tem_juros:temJuros
-  };
-  saveFaturas();
-
-  // Lançar pagamento da fatura no fluxo de caixa (despesa no mês do pagamento)
-  setSyncStatus("loading");
-  try{
-    const descFatura="Pagamento fatura "+cartao.nome+" "+MESES[mes-1]+"/"+ano+
-      (obs?" — "+obs:"");
-    const [nova]=await api.addTxn({
-      descricao:descFatura,
-      valor:valorPago,
-      data:dataPag,
-      tipo:"d",
-      categoria_id:getCatFaturaId(),
-      cartao_id:"dinheiro"
-    });
-    DB.txns.unshift(nova);
-
-    // Se teve juros, lançar separado
-    if(temJuros&&jurosVal>0){
-      const descJuros="Juros/multa fatura "+cartao.nome+" ("+atrasosDias+" dias atraso)";
-      const [novaJ]=await api.addTxn({
-        descricao:descJuros,
-        valor:jurosVal,
-        data:dataPag,
-        tipo:"d",
-        categoria_id:getCatJurosId(),
-        cartao_id:"dinheiro"
-      });
-      DB.txns.unshift(novaJ);
-    }
-    setSyncStatus("ok");
-  }catch(e){
-    setSyncStatus("error");
-    console.error("Erro ao lançar pagamento:",e);
-    // Mesmo com erro no Supabase, salva localmente
-  }
-
-  fecharModalPagar();
-  toast(temJuros?"✅ Fatura paga! Lançado no fluxo de "+dataPag.split("-").reverse().join("/")+" com juros de "+brl(jurosVal)
-    :"✅ Fatura paga! Lançado no fluxo de "+dataPag.split("-").reverse().join("/"));
-  renderFaturas(monthTxns());
-  render();
-}
-
-function getCatFaturaId(){
-  // Busca categoria "Financeiro" ou a primeira de despesa
-  const cat=DB.catsD.find(c=>c.nome.toLowerCase().includes("financeiro")||c.nome.toLowerCase().includes("cartão")||c.nome.toLowerCase().includes("cartao"));
-  return cat?cat.id:(DB.catsD[0]?DB.catsD[0].id:"outros");
-}
-function getCatJurosId(){
-  // Busca categoria "Financeiro" para juros
-  const cat=DB.catsD.find(c=>c.nome.toLowerCase().includes("financeiro")||c.nome.toLowerCase().includes("juros")||c.nome.toLowerCase().includes("banco"));
-  return cat?cat.id:(DB.catsD[0]?DB.catsD[0].id:"outros");
-}
-
-// ══════════════════════════════════
-//  PARCELAMENTOS
-// ══════════════════════════════════
-let parcDB=[];
-function loadParc(){try{parcDB=JSON.parse(localStorage.getItem("gf_parcelamentos")||"[]")}catch{parcDB=[]}}
-function saveParc(){localStorage.setItem("gf_parcelamentos",JSON.stringify(parcDB))}
-loadParc();
-
-function calcParcela(){
-  const total=parseFloat(document.getElementById("parc-total").value)||0;
-  const num=parseInt(document.getElementById("parc-num").value)||0;
-  if(total>0&&num>0){
-    document.getElementById("parc-val").value=(total/num).toFixed(2);
-  }
-}
-
-function fillParcSelects(){
-  const cats=DB.catsD;
-  const el=document.getElementById("parc-cat");
-  if(el)el.innerHTML=cats.map(c=>`<option value="${c.id}">${c.icon} ${c.nome}</option>`).join("");
-  const elc=document.getElementById("parc-cartao");
-  if(elc)elc.innerHTML=`<option value="dinheiro">💵 Dinheiro / Pix</option>`+DB.cartoes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join("");
-}
-
-function addParcelamento(){
-  const desc=document.getElementById("parc-desc").value.trim();
-  const total=parseFloat(document.getElementById("parc-total").value);
-  const num=parseInt(document.getElementById("parc-num").value);
-  const inicio=document.getElementById("parc-inicio").value;
-  const dia=parseInt(document.getElementById("parc-dia").value)||10;
-  const cat=document.getElementById("parc-cat").value;
-  const cartao=document.getElementById("parc-cartao").value;
-  if(!desc){toast("⚠ Digite a descrição");return}
-  if(!total||total<=0){toast("⚠ Digite o valor total");return}
-  if(!num||num<=0){toast("⚠ Digite o número de parcelas");return}
-  if(!inicio){toast("⚠ Escolha o mês inicial");return}
-  const valParcela=parseFloat((total/num).toFixed(2));
-  const [ano,mes]=inicio.split("-").map(Number);
-  parcDB.push({
-    id:"p"+Date.now(),
-    desc,valor_total:total,num_parcelas:num,
-    valor_parcela:valParcela,
-    ano_inicio:ano,mes_inicio:mes,
-    dia_vencimento:dia,cat,cartao,
-    ativo:true,criado_em:new Date().toISOString()
-  });
-  saveParc();
-  document.getElementById("parc-desc").value="";
-  document.getElementById("parc-total").value="";
-  document.getElementById("parc-num").value="";
-  document.getElementById("parc-val").value="";
-  toast("✅ Parcelamento adicionado! As parcelas aparecem automaticamente em cada mês.");
-  renderParcelados();
-  render();
-}
-
-function delParc(id){
-  parcDB=parcDB.filter(p=>p.id!==id);
-  saveParc();toast("🗑 Parcelamento removido");
-  renderParcelados();render();
-}
-
-function getParcMes(y,m){
-  // Retorna parcelas ativas neste mês/ano
-  return parcDB.filter(p=>{
-    if(!p.ativo)return false;
-    const inicio=p.ano_inicio*12+p.mes_inicio;
-    const fim=inicio+p.num_parcelas-1;
-    const atual=y*12+m;
-    return atual>=inicio&&atual<=fim;
-  }).map(p=>{
-    const inicio=p.ano_inicio*12+p.mes_inicio;
-    const atual=cur.y*12+cur.m;
-    const numParcela=atual-inicio+1;
-    return{...p,numParcela,parcRestantes:p.num_parcelas-numParcela};
-  });
-}
-
-function renderParcelados(){
-  fillParcSelects();
-  // Set default month
-  const hoje=new Date();
-  const mesAtual=hoje.getFullYear()+"-"+String(hoje.getMonth()+1).padStart(2,"0");
-  const el=document.getElementById("parc-inicio");
-  if(el&&!el.value)el.value=mesAtual;
-
-  const lista=document.getElementById("parc-lista");
-  if(!lista)return;
-  if(!parcDB.length){
-    lista.innerHTML=`<div class="empty"><div class="empty-icon">📅</div>Nenhum parcelamento cadastrado.</div>`;
-    return;
-  }
-  lista.innerHTML=parcDB.map(p=>{
-    const inicio=new Date(p.ano_inicio,p.mes_inicio-1,1);
-    const fim=new Date(p.ano_inicio,p.mes_inicio-1+p.num_parcelas-1,1);
-    const cart=getCartao(p.cartao);
-    const cat=getCat(p.cat);
-    const hoje2=new Date();
-    const atual=p.ano_inicio*12+p.mes_inicio;
-    const atualHoje=hoje2.getFullYear()*12+(hoje2.getMonth()+1);
-    const parcAtual=atualHoje-atual+1;
-    const restantes=p.num_parcelas-Math.max(0,parcAtual-1);
-    const pct=Math.min(100,Math.round((Math.max(0,parcAtual-1))/p.num_parcelas*100));
-    return`<div style="background:var(--bg3);border-radius:var(--r10);padding:14px;margin-bottom:8px;border-left:3px solid ${cart.cor}">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-        <div>
-          <div style="font-size:13px;font-weight:600">${p.desc}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px">${cat.icon} ${cat.nome} · <span style="color:${cart.cor}">${cart.nome}</span> · vence dia ${p.dia_vencimento}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="text-align:right">
-            <div style="font-size:16px;font-weight:700;color:var(--red)">${brl(p.valor_parcela)}<span style="font-size:10px;color:var(--text3)">/mês</span></div>
-            <div style="font-size:10px;color:var(--text3)">${restantes} parcelas restantes</div>
-          </div>
-          <button class="row-del" onclick="delParc('${p.id}')">×</button>
-        </div>
-      </div>
-      <div class="prog-wrap" style="height:6px"><div class="prog-fill" style="width:${pct}%;background:${cart.cor}"></div></div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px">
-        <span>${MESES[p.mes_inicio-1]} ${p.ano_inicio}</span>
-        <span>${pct}% pago · Total: ${brl(p.valor_total)}</span>
-        <span>${MESES[(p.mes_inicio-1+p.num_parcelas-1)%12]} ${p.ano_inicio+Math.floor((p.mes_inicio-1+p.num_parcelas-1)/12)}</span>
-      </div>
-    </div>`;
-  }).join("");
-}
-
-function renderCompromissos(txns){
-  const parcMes=getParcMes(cur.y,cur.m);
-  const hoje=new Date();
-  const diaHoje=hoje.getDate();
-
-  // Empréstimos do patrimônio
-  const emprestimos=patDB.emprestimos||[];
-  const consorcios=patDB.consorcios||[];
-
-  let items=[];
-
-  // Parcelas do mês
-  parcMes.forEach(p=>{
-    const cart=getCartao(p.cartao);
-    const cat=getCat(p.cat);
-    const diasVenc=p.dia_vencimento-diaHoje;
-    const status=diasVenc<0?"vencido":diasVenc===0?"vence-hoje":diasVenc<=7?"vence-semana":"vence-mes";
-    items.push({
-      icon:cat.icon,
-      nome:p.desc,
-      meta:`Parcela ${p.numParcela}/${p.num_parcelas} · ${cart.nome} · dia ${p.dia_vencimento}`,
-      val:p.valor_parcela,
-      status,diasVenc,
-      cor:cart.cor
-    });
-  });
-
-  // Empréstimos fixos
-  emprestimos.forEach(e=>{
-    const venc=parseInt(e.vencimento_dia)||10;
-    const diasVenc=venc-diaHoje;
-    const status=diasVenc<0?"vencido":diasVenc===0?"vence-hoje":diasVenc<=7?"vence-semana":"vence-mes";
-    items.push({
-      icon:"🏦",
-      nome:e.nome,
-      meta:`Financiamento · ${e.credor||""} · dia ${venc}`,
-      val:parseFloat(e.valor_parcela||0),
-      status,diasVenc,
-      cor:"var(--red)"
-    });
-  });
-
-  // Consórcios
-  consorcios.forEach(c=>{
-    items.push({
-      icon:"🎯",
-      nome:c.nome,
-      meta:`Consórcio · ${c.administradora||""} · ${c.parcelas_restantes||0} parcelas restantes`,
-      val:parseFloat(c.valor_parcela||0),
-      status:"vence-mes",diasVenc:30,
-      cor:"var(--accent)"
-    });
-  });
-
-  const totalCompr=items.reduce((s,i)=>s+i.val,0);
-  const el=document.getElementById("dash-compromissos");
-  if(!el)return;
-  if(!items.length){
-    el.style.display="none";
-    return;
-  }
-  el.style.display="";
-  // Count paid faturas this month
-  const faturasPagasCount=Object.keys(faturasDB).filter(k=>k.includes("_"+cur.y+"_"+cur.m)).length;
-  el.innerHTML=`
-    <div class="card-title">
-      <span>📅 Compromissos do mês</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        ${faturasPagasCount>0?`<span class="fatura-paga-badge">✓ ${faturasPagasCount} paga${faturasPagasCount>1?"s":""}</span>`:""}
-        <span style="color:var(--red);font-size:13px;font-weight:600">${brl(totalCompr)}</span>
-      </div>
-    </div>
-    ${items.sort((a,b)=>a.diasVenc-b.diasVenc).map(i=>{
-      const tagTxt=i.diasVenc<0?"VENCIDO":i.diasVenc===0?"HOJE":i.diasVenc<=7?`${i.diasVenc} dias`:`Dia ${i.status==="vence-mes"?i.meta.match(/dia (\d+)/)?.[1]||"":i.diasVenc+diaHoje}`;
-      const tagColor=i.diasVenc<0?"var(--red)":i.diasVenc===0?"var(--red)":i.diasVenc<=7?"var(--amber)":"var(--blue)";
-      return`<div class="compromisso-card ${i.status}" style="border-left-color:${i.cor}">
-        <div class="compromisso-icon">${i.icon}</div>
-        <div class="compromisso-body">
-          <div class="compromisso-nome">${i.nome}</div>
-          <div class="compromisso-meta">${i.meta}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <div class="compromisso-val">${brl(i.val)}</div>
-          <span style="font-size:10px;font-weight:600;color:${tagColor};background:${tagColor}18;padding:2px 8px;border-radius:99px">${tagTxt}</span>
-        </div>
-      </div>`;
-    }).join("")}
-  `;
-}
-
-// ══════════════════════════════════
-//  PATRIMÔNIO
-// ══════════════════════════════════
-const PAT_TIPOS={
-  imoveis:{label:"Imóveis & Empreendimentos",icon:"🏠",color:"var(--blue)"},
-  veiculos:{label:"Veículos",icon:"🚗",color:"var(--amber)"},
-  consorcios:{label:"Consórcios",icon:"🎯",color:"var(--accent)"},
-  investimentos:{label:"Investimentos",icon:"💎",color:"var(--green)"},
-  emprestimos:{label:"Empréstimos & Financiamentos",icon:"🏦",color:"var(--red)"}
-};
-let patTab="imoveis";
-let patDB={imoveis:[],veiculos:[],consorcios:[],investimentos:[],emprestimos:[]};
-
-function loadPat(){
-  try{const d=JSON.parse(localStorage.getItem("gf_patrimonio")||"null");if(d)patDB=d;}catch{}
-}
-function savePat(){localStorage.setItem("gf_patrimonio",JSON.stringify(patDB));}
-loadPat();
-
-function setPatTab(t,btn){
-  patTab=t;
-  document.querySelectorAll("#pat-tabs button").forEach(b=>{b.className="btn btn-ghost btn-sm"});
-  btn.className="btn btn-accent btn-sm";
-  renderPatrimonio();
-}
-
-function calcPatrimonio(){
-  let totalBens=0,totalDividas=0;
-  ["imoveis","veiculos","consorcios"].forEach(k=>{
-    patDB[k].forEach(i=>{totalBens+=parseFloat(i.valor_atual||i.valor_bem||0)});
-  });
-  patDB.investimentos.forEach(i=>{totalBens+=parseFloat(i.saldo_atual||0)});
-  patDB.emprestimos.forEach(i=>{totalDividas+=parseFloat(i.saldo_devedor||0)});
-  patDB.consorcios.forEach(i=>{totalDividas+=parseFloat(i.saldo_devedor||0)});
-  return{totalBens,totalDividas,liquido:totalBens-totalDividas};
-}
-
-function renderPatrimonio(){
-  const {totalBens,totalDividas,liquido}=calcPatrimonio();
-  const totalInv=patDB.investimentos.reduce((s,i)=>s+parseFloat(i.saldo_atual||0),0);
-
-  document.getElementById("balanco-wrap").innerHTML=`
-    <div style="background:linear-gradient(135deg,rgba(200,240,96,.07),var(--bg2));border:1px solid rgba(200,240,96,.2);border-radius:var(--r14);padding:20px;margin-bottom:4px">
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);font-weight:600;margin-bottom:14px">⚖ Balanço Patrimonial</div>
-      <div class="balanco-grid">
-        <div class="balanco-card"><div class="balanco-label">Total de Bens</div><div class="balanco-val" style="color:var(--green)">${brl(totalBens)}</div></div>
-        <div class="balanco-card"><div class="balanco-label">Total de Dívidas</div><div class="balanco-val" style="color:var(--red)">${brl(totalDividas)}</div></div>
-        <div class="balanco-card"><div class="balanco-label">Investimentos</div><div class="balanco-val" style="color:var(--blue)">${brl(totalInv)}</div></div>
-        <div class="balanco-card"><div class="balanco-label">Patrimônio Líquido</div><div class="balanco-val" style="color:${liquido>=0?"var(--accent)":"var(--red)"}; font-size:22px">${brl(liquido)}</div></div>
-      </div>
-    </div>
-  `;
-
-  const forms={
-    imoveis:`<div class="pat-form">
-      <div class="pat-form-title">+ Adicionar Imóvel / Empreendimento</div>
-      <div class="pat-form-grid" style="margin-bottom:10px">
-        <div class="mini-field"><label>Nome / Descrição</label><input id="pi-nome" placeholder="Ex: Apto Nordeste, Terreno..."/></div>
-        <div class="mini-field"><label>Localização</label><input id="pi-local" placeholder="Ex: Fortaleza-CE"/></div>
-        <div class="mini-field"><label>Valor de compra (R$)</label><input type="number" id="pi-compra" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Valor atual estimado (R$)</label><input type="number" id="pi-atual" placeholder="0,00"/></div>
-      </div>
-      <button class="btn btn-accent btn-sm" onclick="addPat('imoveis')">+ Adicionar</button>
-    </div>`,
-
-    veiculos:`<div class="pat-form">
-      <div class="pat-form-title">+ Adicionar Veículo</div>
-      <div class="pat-form-grid" style="margin-bottom:10px">
-        <div class="mini-field"><label>Descrição</label><input id="pv-nome" placeholder="Ex: Honda HRV 2023"/></div>
-        <div class="mini-field"><label>Ano</label><input id="pv-ano" placeholder="Ex: 2023"/></div>
-        <div class="mini-field"><label>Valor atual (R$)</label><input type="number" id="pv-atual" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Saldo financiamento (R$)</label><input type="number" id="pv-divida" placeholder="0,00 (0 se quitado)"/></div>
-      </div>
-      <button class="btn btn-accent btn-sm" onclick="addPat('veiculos')">+ Adicionar</button>
-    </div>`,
-
-    consorcios:`<div class="pat-form">
-      <div class="pat-form-title">+ Adicionar Consórcio</div>
-      <div class="pat-form-grid" style="margin-bottom:10px">
-        <div class="mini-field"><label>Descrição</label><input id="pc-nome" placeholder="Ex: Consórcio Imóvel Caixa"/></div>
-        <div class="mini-field"><label>Administradora</label><input id="pc-admin" placeholder="Ex: Caixa, Porto Seguro..."/></div>
-        <div class="mini-field"><label>Valor do bem (R$)</label><input type="number" id="pc-bem" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Já paguei (R$)</label><input type="number" id="pc-pago" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Saldo devedor (R$)</label><input type="number" id="pc-devedor" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Parcelas restantes</label><input type="number" id="pc-parcelas" placeholder="Ex: 120"/></div>
-        <div class="mini-field"><label>Valor da parcela (R$)</label><input type="number" id="pc-parcela-val" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Contemplado?</label><select id="pc-contemp"><option value="nao">Não ainda</option><option value="sim">Sim</option></select></div>
-      </div>
-      <button class="btn btn-accent btn-sm" onclick="addPat('consorcios')">+ Adicionar</button>
-    </div>`,
-
-    investimentos:`<div class="pat-form">
-      <div class="pat-form-title">+ Adicionar Investimento</div>
-      <div class="pat-form-grid" style="margin-bottom:10px">
-        <div class="mini-field"><label>Descrição</label><input id="pinv-nome" placeholder="Ex: CDB Banco Inter, Tesouro..."/></div>
-        <div class="mini-field"><label>Tipo</label><select id="pinv-tipo"><option>Renda Fixa</option><option>Ações</option><option>FII</option><option>Poupança</option><option>Criptomoedas</option><option>Outro</option></select></div>
-        <div class="mini-field"><label>Valor aplicado (R$)</label><input type="number" id="pinv-aplicado" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Saldo atual (R$)</label><input type="number" id="pinv-atual" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Instituição</label><input id="pinv-inst" placeholder="Ex: XP, Inter, Nubank..."/></div>
-        <div class="mini-field"><label>Rendimento % a.a.</label><input type="number" id="pinv-rend" placeholder="Ex: 12,5"/></div>
-      </div>
-      <button class="btn btn-accent btn-sm" onclick="addPat('investimentos')">+ Adicionar</button>
-    </div>`,
-
-    emprestimos:`<div class="pat-form">
-      <div class="pat-form-title">+ Adicionar Empréstimo / Financiamento</div>
-      <div class="pat-form-grid" style="margin-bottom:10px">
-        <div class="mini-field"><label>Descrição</label><input id="pe-nome" placeholder="Ex: Financiamento imóvel CEF"/></div>
-        <div class="mini-field"><label>Credor</label><input id="pe-credor" placeholder="Ex: Caixa, Bradesco..."/></div>
-        <div class="mini-field"><label>Valor original (R$)</label><input type="number" id="pe-original" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Saldo devedor (R$)</label><input type="number" id="pe-devedor" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Valor da parcela (R$)</label><input type="number" id="pe-parcela" placeholder="0,00"/></div>
-        <div class="mini-field"><label>Parcelas restantes</label><input type="number" id="pe-parcelas" placeholder="Ex: 240"/></div>
-        <div class="mini-field"><label>Taxa de juros % a.a.</label><input type="number" id="pe-juros" placeholder="Ex: 9,5"/></div>
-        <div class="mini-field"><label>Vencimento da parcela (dia)</label><input type="number" id="pe-venc" placeholder="Ex: 10"/></div>
-      </div>
-      <button class="btn btn-accent btn-sm" onclick="addPat('emprestimos')">+ Adicionar</button>
-    </div>`
-  };
-
-  const items=patDB[patTab];
-  let cardsHtml="";
-
-  if(patTab==="imoveis"){
-    cardsHtml=items.map((i,idx)=>{
-      const valComp=parseFloat(i.valor_compra||0);
-      const valAtual=parseFloat(i.valor_atual||0);
-      const ganho=valAtual-valComp;
-      const pct=valComp>0?Math.round((ganho/valComp)*100):0;
-      return`<div class="pat-card">
-        <div class="pat-card-head">
-          <div class="pat-card-title"><span style="font-size:22px">🏠</span><div><div>${i.nome}</div><div style="font-size:11px;color:var(--text2);font-weight:400">${i.local||""}</div></div></div>
-          <div class="pat-card-vals">
-            <div class="pat-val-block"><div class="pat-val-label">Valor compra</div><div class="pat-val-num" style="color:var(--text2)">${brl(valComp)}</div></div>
-            <div class="pat-val-block"><div class="pat-val-label">Valor atual</div><div class="pat-val-num" style="color:var(--blue)">${brl(valAtual)}</div></div>
-            <div class="pat-val-block"><div class="pat-val-label">Valorização</div><div class="pat-val-num" style="color:${ganho>=0?"var(--green)":"var(--red)"}">${ganho>=0?"+":""}${pct}%</div></div>
-            <button class="row-del" onclick="delPat('imoveis',${idx})">×</button>
-          </div>
-        </div>
-      </div>`;
-    }).join("");
-  }
-
-  if(patTab==="veiculos"){
-    cardsHtml=items.map((i,idx)=>{
-      const valAtual=parseFloat(i.valor_atual||0);
-      const divida=parseFloat(i.saldo_divida||0);
-      const liquido=valAtual-divida;
-      return`<div class="pat-card">
-        <div class="pat-card-head">
-          <div class="pat-card-title"><span style="font-size:22px">🚗</span><div><div>${i.nome}</div><div style="font-size:11px;color:var(--text2);font-weight:400">${i.ano||""}</div></div></div>
-          <div class="pat-card-vals">
-            <div class="pat-val-block"><div class="pat-val-label">Valor atual</div><div class="pat-val-num" style="color:var(--blue)">${brl(valAtual)}</div></div>
-            ${divida>0?`<div class="pat-val-block"><div class="pat-val-label">Financiamento</div><div class="pat-val-num" style="color:var(--red)">${brl(divida)}</div></div>`:""}
-            <div class="pat-val-block"><div class="pat-val-label">Valor líquido</div><div class="pat-val-num" style="color:var(--green)">${brl(liquido)}</div></div>
-            <button class="row-del" onclick="delPat('veiculos',${idx})">×</button>
-          </div>
-        </div>
-      </div>`;
-    }).join("");
-  }
-
-  if(patTab==="consorcios"){
-    cardsHtml=items.map((i,idx)=>{
-      const bem=parseFloat(i.valor_bem||0);
-      const pago=parseFloat(i.valor_pago||0);
-      const devedor=parseFloat(i.saldo_devedor||0);
-      const pct=bem>0?Math.min(100,Math.round(pago/bem*100)):0;
-      return`<div class="pat-card">
-        <div class="pat-card-head">
-          <div class="pat-card-title"><span style="font-size:22px">🎯</span><div><div>${i.nome}</div><div style="font-size:11px;color:var(--text2);font-weight:400">${i.administradora||""} ${i.contemplado==="sim"?'<span class="badge badge-green">Contemplado</span>':''}</div></div></div>
-          <div class="pat-card-vals">
-            <div class="pat-val-block"><div class="pat-val-label">Valor do bem</div><div class="pat-val-num" style="color:var(--blue)">${brl(bem)}</div></div>
-            <div class="pat-val-block"><div class="pat-val-label">Já paguei</div><div class="pat-val-num" style="color:var(--green)">${brl(pago)}</div></div>
-            <div class="pat-val-block"><div class="pat-val-label">Saldo devedor</div><div class="pat-val-num" style="color:var(--red)">${brl(devedor)}</div></div>
-            <button class="row-del" onclick="delPat('consorcios',${idx})">×</button>
-          </div>
-        </div>
-        <div class="pat-progress">
-          <div class="pat-progress-label"><span>Progresso do pagamento</span><span>${pct}% pago</span></div>
-          <div class="prog-wrap" style="height:8px"><div class="prog-fill" style="width:${pct}%;background:var(--accent)"></div></div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px">${i.parcelas_restantes||0} parcelas restantes de ${brl(parseFloat(i.valor_parcela||0))}</div>
-        </div>
-      </div>`;
-    }).join("");
-  }
-
-  if(patTab==="investimentos"){
-    cardsHtml=items.map((i,idx)=>{
-      const aplicado=parseFloat(i.valor_aplicado||0);
-      const atual=parseFloat(i.saldo_atual||0);
-      const ganho=atual-aplicado;
-      const pct=aplicado>0?Math.round((ganho/aplicado)*100):0;
-      return`<div class="pat-card">
-        <div class="pat-card-head">
-          <div class="pat-card-title"><span style="font-size:22px">💎</span><div><div>${i.nome}</div><div style="font-size:11px;color:var(--text2);font-weight:400">${i.tipo||""} · ${i.instituicao||""}</div></div></div>
-          <div class="pat-card-vals">
-            <div class="pat-val-block"><div class="pat-val-label">Aplicado</div><div class="pat-val-num" style="color:var(--text2)">${brl(aplicado)}</div></div>
-            <div class="pat-val-block"><div class="pat-val-label">Saldo atual</div><div class="pat-val-num" style="color:var(--green)">${brl(atual)}</div></div>
-            <div class="pat-val-block"><div class="pat-val-label">Rendimento</div><div class="pat-val-num" style="color:${ganho>=0?"var(--green)":"var(--red)"}">${ganho>=0?"+":""}${pct}%</div></div>
-            ${i.rendimento_aa?`<div class="pat-val-block"><div class="pat-val-label">Taxa a.a.</div><div class="pat-val-num" style="color:var(--blue)">${i.rendimento_aa}%</div></div>`:""}
-            <button class="row-del" onclick="delPat('investimentos',${idx})">×</button>
-          </div>
-        </div>
-      </div>`;
-    }).join("");
-  }
-
-  if(patTab==="emprestimos"){
-    cardsHtml=items.map((i,idx)=>{
-      const original=parseFloat(i.valor_original||0);
-      const devedor=parseFloat(i.saldo_devedor||0);
-      const pago=original-devedor;
-      const pct=original>0?Math.min(100,Math.round(pago/original*100)):0;
-      return`<div class="pat-card">
-        <div class="pat-card-head">
-          <div class="pat-card-title"><span style="font-size:22px">🏦</span><div><div>${i.nome}</div><div style="font-size:11px;color:var(--text2);font-weight:400">${i.credor||""} · ${i.taxa_juros||0}% a.a.</div></div></div>
-          <div class="pat-card-vals">
-            <div class="pat-val-block"><div class="pat-val-label">Valor original</div><div class="pat-val-num" style="color:var(--text2)">${brl(original)}</div></div>
-            <div class="pat-val-block"><div class="pat-val-label">Saldo devedor</div><div class="pat-val-num" style="color:var(--red)">${brl(devedor)}</div></div>
-            <div class="pat-val-block"><div class="pat-val-label">Parcela</div><div class="pat-val-num" style="color:var(--amber)">${brl(parseFloat(i.valor_parcela||0))}</div></div>
-            <button class="row-del" onclick="delPat('emprestimos',${idx})">×</button>
-          </div>
-        </div>
-        <div class="pat-progress">
-          <div class="pat-progress-label"><span>Progresso da quitação</span><span>${pct}% pago · ${i.parcelas_restantes||0} parcelas restantes</span></div>
-          <div class="prog-wrap" style="height:8px"><div class="prog-fill" style="width:${pct}%;background:var(--green)"></div></div>
-          ${i.vencimento_dia?`<div style="font-size:11px;color:var(--text2);margin-top:4px">Vencimento todo dia ${i.vencimento_dia}</div>`:""}
-        </div>
-      </div>`;
-    }).join("");
-  }
-
-  document.getElementById("pat-content").innerHTML=
-    forms[patTab]+
-    (items.length===0?`<div class="empty"><div class="empty-icon">${PAT_TIPOS[patTab].icon}</div>Nenhum ${PAT_TIPOS[patTab].label.toLowerCase()} cadastrado ainda.</div>`:cardsHtml);
-}
-
-function addPat(tipo){
-  let item={};
-  if(tipo==="imoveis"){
-    item={nome:v("pi-nome"),local:v("pi-local"),valor_compra:v("pi-compra"),valor_atual:v("pi-atual")};
-    if(!item.nome){toast("⚠ Digite o nome");return}
-  }
-  if(tipo==="veiculos"){
-    item={nome:v("pv-nome"),ano:v("pv-ano"),valor_atual:v("pv-atual"),saldo_divida:v("pv-divida")};
-    if(!item.nome){toast("⚠ Digite a descrição");return}
-  }
-  if(tipo==="consorcios"){
-    item={nome:v("pc-nome"),administradora:v("pc-admin"),valor_bem:v("pc-bem"),valor_pago:v("pc-pago"),saldo_devedor:v("pc-devedor"),parcelas_restantes:v("pc-parcelas"),valor_parcela:v("pc-parcela-val"),contemplado:v("pc-contemp")};
-    if(!item.nome){toast("⚠ Digite a descrição");return}
-  }
-  if(tipo==="investimentos"){
-    item={nome:v("pinv-nome"),tipo:v("pinv-tipo"),valor_aplicado:v("pinv-aplicado"),saldo_atual:v("pinv-atual"),instituicao:v("pinv-inst"),rendimento_aa:v("pinv-rend")};
-    if(!item.nome){toast("⚠ Digite a descrição");return}
-  }
-  if(tipo==="emprestimos"){
-    item={nome:v("pe-nome"),credor:v("pe-credor"),valor_original:v("pe-original"),saldo_devedor:v("pe-devedor"),valor_parcela:v("pe-parcela"),parcelas_restantes:v("pe-parcelas"),taxa_juros:v("pe-juros"),vencimento_dia:v("pe-venc")};
-    if(!item.nome){toast("⚠ Digite a descrição");return}
-  }
-  patDB[tipo].push(item);
-  savePat();
-  toast("✅ Adicionado com sucesso!");
-  renderPatrimonio();
-}
-
-function delPat(tipo,idx){
-  patDB[tipo].splice(idx,1);
-  savePat();
-  toast("🗑 Removido");
-  renderPatrimonio();
-}
-
-function v(id){
-  const el=document.getElementById(id);
-  return el?el.value:"";
-}
-
 init();
 </script>
-
-<!-- MODAL PAGAR FATURA -->
-<div id="modal-pagar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:center;justify-content:center">
-  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r20);padding:28px;max-width:440px;width:90%;max-height:90vh;overflow-y:auto">
-    <div style="font-size:16px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px">💳 Registrar pagamento</div>
-    <div id="modal-pagar-desc" style="font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.5;padding:10px 14px;background:var(--bg3);border-radius:var(--r10)"></div>
-
-    <input type="hidden" id="mp-cartao-id"/>
-    <input type="hidden" id="mp-ano"/>
-    <input type="hidden" id="mp-mes"/>
-    <input type="hidden" id="mp-total"/>
-
-    <div class="form-row" style="margin-bottom:12px">
-      <div class="field" style="margin-bottom:0">
-        <label>Data do pagamento</label>
-        <input type="date" id="mp-data"/>
-      </div>
-      <div class="field" style="margin-bottom:0">
-        <label>Valor pago (R$)</label>
-        <input type="number" id="mp-valor" placeholder="0,00" step="0.01" min="0"/>
-      </div>
-    </div>
-
-    <div class="field" style="margin-bottom:12px">
-      <label>Teve juros / multa por atraso?</label>
-      <div class="type-toggle">
-        <button class="type-btn on-r" id="mp-btn-sem" onclick="setJuros(false)">✓ Sem juros</button>
-        <button class="type-btn" id="mp-btn-com" onclick="setJuros(true)">⚠ Com juros</button>
-      </div>
-    </div>
-
-    <div id="mp-juros-wrap" style="display:none;margin-bottom:12px">
-      <div class="form-row" style="margin-bottom:10px">
-        <div class="field" style="margin-bottom:0">
-          <label>Valor dos juros/multa (R$)</label>
-          <input type="number" id="mp-juros-val" placeholder="0,00" step="0.01" min="0" oninput="calcTotalPagar()"/>
-        </div>
-        <div class="field" style="margin-bottom:0">
-          <label>Dias de atraso</label>
-          <input type="number" id="mp-atraso-dias" placeholder="Ex: 5" min="0"/>
-        </div>
-      </div>
-      <div id="mp-total-wrap" style="padding:10px 14px;background:var(--red-bg);border-radius:var(--r10);font-size:13px;color:var(--red)">
-        Total com juros: <strong id="mp-total-juros">R$ 0,00</strong>
-      </div>
-    </div>
-
-    <div class="field" style="margin-bottom:20px">
-      <label>Observação (opcional)</label>
-      <input type="text" id="mp-obs" placeholder="Ex: Pago via débito, app..."/>
-    </div>
-
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="btn btn-ghost" onclick="fecharModalPagar()">Cancelar</button>
-      <button class="btn btn-accent" onclick="confirmarPagamento()">✓ Confirmar pagamento</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
