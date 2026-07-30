@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#101726"/>
+<title>Finanças Dornellas</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#101726; --ink2:#18202F; --ink3:#212B3D; --ink4:#2C3850;
+  --line:#293448; --line2:#3A4763;
+  --paper:#EDF0F5; --paper2:#95A1B8; --paper3:#606E88;
+  --gold:#E9B949; --gold-soft:rgba(233,185,73,.14);
+  --up:#3ED598; --up-soft:rgba(62,213,152,.13);
+  --down:#FF6B6B; --down-soft:rgba(255,107,107,.13);
+  --r8:8px; --r12:12px; --r16:16px; --r22:22px;
+  --nav:66px;
+}
+html,body{height:100%;background:var(--ink);color:var(--paper);
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:15px;line-height:1.5}
+body{overflow:hidden}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+.app{display:flex;flex-direction:column;height:100dvh;max-width:920px;margin:0 auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px 10px;flex-shrink:0}
+.brand{font-family:'Fraunces',serif;font-size:19px;font-weight:600;font-style:italic;color:var(--gold);line-height:1}
+.brand small{display:block;font-family:'IBM Plex Mono',monospace;font-style:normal;
+  font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--paper3);margin-top:3px}
+.top-right{display:flex;align-items:center;gap:8px}
+.mnav{display:flex;align-items:center;gap:2px;background:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:3px}
+.mnav button{background:none;border:none;color:var(--paper2);width:28px;height:28px;
+  border-radius:999px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+.mnav button:hover{background:var(--ink4);color:var(--paper)}
+.mnav .lbl{font-size:12px;font-weight:600;min-width:74px;text-align:center;color:var(--paper)}
+.icon-btn{background:var(--ink2);border:1px solid var(--line);color:var(--paper2);
+  width:34px;height:34px;border-radius:999px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
+.icon-btn:hover{color:var(--paper);border-color:var(--line2)}
+.sync{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--paper3);padding:0 2px}
+.sync.on{color:var(--up)} .sync.off{color:var(--down)} .sync.busy{color:var(--gold)}
+
+.main{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 18px calc(var(--nav) + 26px)}
+.screen{display:none} .screen.on{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+.nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:rgba(16,23,38,.94);
+  backdrop-filter:blur(14px);border-top:1px solid var(--line);
+  display:flex;z-index:60;max-width:920px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;background:none;border:none;color:var(--paper3);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-size:9.5px;font-weight:600;letter-spacing:.03em;font-family:inherit;padding-top:4px}
+.nav button .ic{font-size:19px;line-height:1}
+.nav button.on{color:var(--gold)}
+
+.card{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r16);padding:16px;margin-bottom:12px}
+.card-t{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--paper3);margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.h1{font-family:'Fraunces',serif;font-size:25px;font-weight:600;margin-bottom:14px;letter-spacing:-.01em}
+
+.tide{border-radius:var(--r22);padding:20px;margin-bottom:12px;position:relative;overflow:hidden;border:1px solid var(--line)}
+.tide.pos{background:linear-gradient(160deg,var(--up-soft),transparent 70%);border-color:rgba(62,213,152,.3)}
+.tide.neg{background:linear-gradient(160deg,var(--down-soft),transparent 70%);border-color:rgba(255,107,107,.3)}
+.tide-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper2)}
+.tide-val{font-size:40px;font-weight:700;line-height:1.1;margin:6px 0 2px;letter-spacing:-.03em}
+.tide-sub{font-size:12.5px;color:var(--paper2)}
+.gauge{margin-top:16px}
+.gauge-bar{height:9px;background:var(--ink3);border-radius:999px;overflow:hidden;position:relative}
+.gauge-fill{height:100%;border-radius:999px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.gauge-legend{display:flex;justify-content:space-between;margin-top:7px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--paper3)}
+
+.seg{display:flex;background:var(--ink3);border-radius:var(--r12);padding:3px;gap:3px;margin-bottom:14px}
+.seg button{flex:1;background:none;border:none;color:var(--paper2);padding:10px;
+  border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600;font-family:inherit}
+.seg button.on-d{background:var(--down-soft);color:var(--down)}
+.seg button.on-r{background:var(--up-soft);color:var(--up)}
+.amount{display:flex;align-items:baseline;gap:8px;background:var(--ink3);
+  border:1px solid var(--line);border-radius:var(--r16);padding:14px 16px;margin-bottom:12px}
+.amount span{font-size:16px;color:var(--paper3);font-weight:600}
+.amount input{flex:1;background:none;border:none;color:var(--paper);font-size:32px;
+  font-weight:700;font-family:inherit;outline:none;width:100%;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.amount input::placeholder{color:var(--paper3)}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;background:var(--ink3);border:1px solid var(--line);color:var(--paper2);
+  padding:8px 13px;border-radius:999px;cursor:pointer;font-size:12.5px;font-weight:500;
+  font-family:inherit;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.chip:hover{border-color:var(--line2)}
+.chip.on{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--paper3);margin-bottom:6px}
+.fld input,.fld select{width:100%;background:var(--ink3);border:1px solid var(--line);
+  color:var(--paper);padding:11px 13px;border-radius:var(--r12);font-size:14.5px;font-family:inherit;outline:none}
+.fld input:focus,.fld select:focus{border-color:var(--gold)}
+.fld select{cursor:pointer;-webkit-appearance:none;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--paper3) 50%),linear-gradient(135deg,var(--paper3) 50%,transparent 50%);
+  background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.btn{border:none;border-radius:var(--r12);padding:13px 18px;cursor:pointer;
+  font-size:14.5px;font-weight:700;font-family:inherit;display:flex;align-items:center;
+  justify-content:center;gap:7px;transition:filter .15s}
+.btn:hover{filter:brightness(1.08)} .btn:active{transform:scale(.99)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn-go{background:var(--gold);color:#161006;width:100%}
+.btn-ghost{background:var(--ink3);color:var(--paper);border:1px solid var(--line)}
+.btn-sm{padding:8px 13px;font-size:12.5px;border-radius:var(--r8)}
+
+.row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row-ic{width:36px;height:36px;border-radius:11px;background:var(--ink3);display:flex;
+  align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.row-mid{flex:1;min-width:0}
+.row-nm{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-sub{font-size:11px;color:var(--paper3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-val{font-size:14.5px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.row-act{background:none;border:none;color:var(--paper3);cursor:pointer;padding:5px;
+  font-size:14px;border-radius:6px;line-height:1;flex-shrink:0}
+.row-act:hover{color:var(--gold)}
+.bar{height:4px;background:var(--ink3);border-radius:999px;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;border-radius:999px}
+
+.tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;vertical-align:middle}
+.tag-up{background:var(--up-soft);color:var(--up)}
+.tag-down{background:var(--down-soft);color:var(--down)}
+.tag-gold{background:var(--gold-soft);color:var(--gold)}
+
+.empty{text-align:center;padding:26px 14px;color:var(--paper3);font-size:13px;line-height:1.7}
+.empty .e{font-size:30px;display:block;margin-bottom:8px;opacity:.55}
+
+.ybar{display:flex;align-items:flex-end;gap:3px;height:80px}
+.ybar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.ybar-pair{display:flex;gap:2px;align-items:flex-end;height:64px;width:100%}
+.ybar-pair i{flex:1;border-radius:3px 3px 0 0;min-height:2px;display:block}
+.ybar-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--paper3)}
+
+.veil{display:none;position:fixed;inset:0;background:rgba(8,12,20,.75);z-index:90;
+  align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+.veil.on{display:flex}
+.sheet{background:var(--ink2);border:1px solid var(--line);border-radius:var(--r22) var(--r22) 0 0;
+  padding:20px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;animation:up .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(28px);opacity:0}to{transform:none;opacity:1}}
+.sheet-t{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-bottom:16px}
+.sheet-act{display:flex;gap:9px;margin-top:18px}
+.sheet-act .btn{flex:1}
+
+.toast{position:fixed;bottom:calc(var(--nav) + 16px);left:50%;transform:translate(-50%,80px);
+  background:var(--ink4);border:1px solid var(--line2);color:var(--paper);
+  padding:11px 18px;border-radius:999px;font-size:13px;font-weight:600;z-index:120;
+  opacity:0;transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+.boot{position:fixed;inset:0;background:var(--ink);z-index:200;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;text-align:center}
+.spin{width:30px;height:30px;border:2.5px solid var(--line);border-top-color:var(--gold);
+  border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.boot-tx{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--paper3);line-height:1.9;max-width:420px}
+
+.note{background:var(--ink3);border:1px solid var(--line);border-radius:var(--r12);
+  padding:11px 13px;font-size:12.5px;line-height:1.75;color:var(--paper2)}
+.note b{color:var(--paper)}
+.note .l{display:flex;justify-content:space-between;gap:12px}
+
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px}
+
+@media(min-width:720px){
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+  .tide-val{font-size:46px}
+}
+@media print{
+  body,html{overflow:visible;height:auto;background:#fff;color:#000}
+  .top,.nav,.veil,.toast,.no-print,.row-act{display:none!important}
+  .main{overflow:visible;padding:0}
+  .screen{display:none!important} .screen.on{display:block!important}
+  .card,.tide{background:#fff!important;border:1px solid #ccc!important;break-inside:avoid}
+  .card-t,.h1,.row-nm,.row-val,.tide-val,.tide-lbl,.note{color:#000!important}
+  @page{margin:1.4cm}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="boot" id="boot">
+  <div class="spin"></div>
+  <div class="boot-tx" id="boot-tx">CONECTANDO</div>
+</div>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">Dornellas<small>Finanças da família</small></div>
+    <div class="top-right">
+      <span class="sync" id="sync">••</span>
+      <div class="mnav">
+        <button onclick="mvMonth(-1)" aria-label="Mês anterior">&lsaquo;</button>
+        <span class="lbl" id="mlbl"></span>
+        <button onclick="mvMonth(1)" aria-label="Próximo mês">&rsaquo;</button>
+      </div>
+      <button class="icon-btn no-print" onclick="show('cfg')" aria-label="Ajustes">&#9881;</button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <section class="screen on" id="s-add">
+      <h1 class="h1">Lançar</h1>
+      <div class="seg">
+        <button id="tg-d" onclick="setKind('d')">Despesa</button>
+        <button id="tg-r" onclick="setKind('r')">Receita</button>
+      </div>
+      <div class="amount">
+        <span>R$</span>
+        <input type="number" id="a-val" inputmode="decimal" placeholder="0,00" step="0.01" min="0"/>
+      </div>
+      <div id="quick-wrap" style="margin-bottom:4px">
+        <div class="card-t">Atalhos</div>
+        <div class="chips" id="quick"></div>
+      </div>
+      <div class="fld"><label>Descrição</label>
+        <input type="text" id="a-desc" placeholder="Mercado, farmácia, salário…"/></div>
+      <div class="fld"><label>Categoria</label><div class="chips" id="a-cats"></div></div>
+      <div class="fld" id="a-pay-wrap"><label>Como pagou</label><div class="chips" id="a-pays"></div></div>
+      <div class="row2">
+        <div class="fld"><label>Data</label><input type="date" id="a-date" onchange="refreshFatura()"/></div>
+        <div class="fld" id="a-fat-wrap" style="display:none"><label>Entra na fatura de</label>
+          <input type="month" id="a-fat"/></div>
+      </div>
+      <button class="btn btn-go" id="a-go" onclick="saveEntry()">Salvar lançamento</button>
+      <div class="card" style="margin-top:18px">
+        <div class="card-t">Contas fixas do mês
+          <button class="btn btn-ghost btn-sm" onclick="openFix()">Gerenciar</button></div>
+        <div id="fix-list"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="s-month">
+      <h1 class="h1" id="m-title">O mês</h1>
+      <div id="m-tide"></div>
+      <div class="grid2">
+        <div>
+          <div class="card"><div class="card-t">Equilíbrio</div><div id="m-eq"></div></div>
+          <div class="card"><div class="card-t">Faturas e formas de pagamento</div><div id="m-cards"></div></div>
+        </div>
+        <div>
+          <div class="card"><div class="card-t">Onde foi o dinheiro</div><div id="m-cats"></div></div>
+          <div class="card"><div class="card-t">Orçamento</div><div id="m-budget"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="s-list">
+      <h1 class="h1">Extrato</h1>
+      <div class="chips" id="l-filters"></div>
+      <div class="card">
+        <div class="card-t"><span id="l-count"></span>
+          <button class="btn btn-ghost btn-sm no-print" onclick="window.print()">Imprimir</button></div>
+        <div id="l-rows"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="s-pat">
+      <h1 class="h1">Patrimônio</h1>
+      <div id="p-totals"></div>
+      <div class="grid2">
+        <div>
+          <div class="card"><div class="card-t">O que eu tenho</div><div id="p-assets"></div></div>
+          <div class="card"><div class="card-t">O que eu devo</div><div id="p-debts"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-t" id="p-form-t">Adicionar</div>
+          <div class="fld"><label>Tipo</label><select id="p-kind" onchange="onKindChange()"></select></div>
+          <div class="fld"><label>Descrição</label><input type="text" id="p-desc" placeholder="Apto Centro, Carro, Tesouro…"/></div>
+          <div class="row2">
+            <div class="fld"><label id="p-val-lbl">Valor</label>
+              <input type="number" id="p-val" placeholder="0,00" step="0.01" min="0" oninput="patPreview()"/></div>
+            <div class="fld" id="p-parc-wrap"><label>Parcela mensal</label>
+              <input type="number" id="p-parc" placeholder="0,00" step="0.01" min="0" oninput="patPreview()"/></div>
+          </div>
+          <div class="row2" id="p-count-wrap">
+            <div class="fld"><label>Já paguei</label>
+              <input type="number" id="p-paid" placeholder="0" step="1" min="0" oninput="patPreview()"/></div>
+            <div class="fld"><label>Total de parcelas</label>
+              <input type="number" id="p-total" placeholder="0" step="1" min="0" oninput="patPreview()"/></div>
+          </div>
+          <div class="fld" id="p-first-wrap"><label>1ª parcela venceu em</label>
+            <input type="month" id="p-first" oninput="patPreview()"/></div>
+          <div id="p-preview" style="display:none;margin-bottom:12px"></div>
+          <div style="display:flex;gap:9px">
+            <button class="btn btn-go" id="p-save" onclick="savePat()">Adicionar</button>
+            <button class="btn btn-ghost" id="p-cancel" onclick="resetPatForm()" style="display:none">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="s-evo">
+      <h1 class="h1">Evolução</h1>
+      <div class="card"><div class="card-t">Entradas e saídas por ano</div><div id="e-bars"></div></div>
+      <div class="card"><div class="card-t">Comparativo</div><div id="e-table"></div></div>
+      <div class="card"><div class="card-t">Categorias ao longo dos anos</div><div id="e-cats"></div></div>
+    </section>
+
+    <section class="screen" id="s-cfg">
+      <h1 class="h1">Ajustes</h1>
+      <div class="grid2">
+        <div>
+          <div class="card">
+            <div class="card-t">Cartões e contas
+              <button class="btn btn-ghost btn-sm" onclick="openCard()">Novo</button></div>
+            <div id="c-cards"></div>
+          </div>
+          <div class="card">
+            <div class="card-t">Quanto quero guardar</div>
+            <div class="fld" style="margin:0"><label>Meta de poupança (% da renda)</label>
+              <input type="number" id="c-save" min="0" max="90" step="1" onchange="saveMeta(this.value)"/></div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-t">Categorias de despesa
+              <button class="btn btn-ghost btn-sm" onclick="openCat('d')">Nova</button></div>
+            <div id="c-catd"></div>
+          </div>
+          <div class="card">
+            <div class="card-t">Categorias de receita
+              <button class="btn btn-ghost btn-sm" onclick="openCat('r')">Nova</button></div>
+            <div id="c-catr"></div>
+          </div>
+          <div class="card">
+            <div class="card-t">Limites por categoria</div>
+            <div id="c-budget"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="nav no-print">
+    <button class="on" id="n-add" onclick="show('add')"><span class="ic">&#65291;</span>Lançar</button>
+    <button id="n-month" onclick="show('month')"><span class="ic">&#9682;</span>O mês</button>
+    <button id="n-list" onclick="show('list')"><span class="ic">&#8801;</span>Extrato</button>
+    <button id="n-pat" onclick="show('pat')"><span class="ic">&#9672;</span>Patrimônio</button>
+    <button id="n-evo" onclick="show('evo')"><span class="ic">&#9645;</span>Evolução</button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="veil" id="v-txn"><div class="sheet">
+  <div class="sheet-t">Editar lançamento</div>
+  <input type="hidden" id="e-id"/><input type="hidden" id="e-kind"/>
+  <div class="row2">
+    <div class="fld"><label>Data</label><input type="date" id="e-date"/></div>
+    <div class="fld"><label>Valor</label><input type="number" id="e-val" step="0.01" min="0"/></div>
+  </div>
+  <div class="fld"><label>Descrição</label><input type="text" id="e-desc"/></div>
+  <div class="row2">
+    <div class="fld"><label>Categoria</label><select id="e-cat"></select></div>
+    <div class="fld"><label>Como pagou</label><select id="e-pay"></select></div>
+  </div>
+  <div class="fld" id="e-fat-wrap" style="display:none"><label>Entra na fatura de</label><input type="month" id="e-fat"/></div>
+  <div class="sheet-act">
+    <button class="btn btn-ghost" onclick="closeV('v-txn')">Cancelar</button>
+    <button class="btn btn-go" onclick="saveTxnEdit()">Salvar</button>
+  </div>
+</div></div>
+
+<div class="veil" id="v-card"><div class="sheet">
+  <div class="sheet-t" id="cd-t">Novo cartão</div>
+  <input type="hidden" id="cd-id"/>
+  <div class="fld"><label>Nome</label><input type="text" id="cd-nome" placeholder="Nubank, Santander…"/></div>
+  <div class="row2">
+    <div class="fld"><label>Fecha no dia</label><input type="number" id="cd-fec" min="1" max="31" placeholder="5"/></div>
+    <div class="fld"><label>Vence no dia</label><input type="number" id="cd-ven" min="1" max="31" placeholder="15"/></div>
+  </div>
+  <div class="fld"><label>Cor</label><input type="color" id="cd-cor" value="#E9B949" style="height:44px;padding:3px"/></div>
+  <div class="sheet-act">
+    <button class="btn btn-ghost" onclick="closeV('v-card')">Cancelar</button>
+    <button class="btn btn-go" onclick="saveCard()">Salvar</button>
+  </div>
+</div></div>
+
+<div class="veil" id="v-cat"><div class="sheet">
+  <div class="sheet-t">Nova categoria</div>
+  <input type="hidden" id="ct-kind"/>
+  <div class="row2">
+    <div class="fld"><label>Ícone</label><input type="text" id="ct-icon" maxlength="2" placeholder="🍽️"/></div>
+    <div class="fld"><label>Nome</label><input type="text" id="ct-nome" placeholder="Alimentação"/></div>
+  </div>
+  <div class="sheet-act">
+    <button class="btn btn-ghost" onclick="closeV('v-cat')">Cancelar</button>
+    <button class="btn btn-go" onclick="saveCat()">Criar</button>
+  </div>
+</div></div>
+
+<div class="veil" id="v-fix"><div class="sheet">
+  <div class="sheet-t">Contas fixas</div>
+  <div class="note" style="margin-bottom:14px">Cadastre o que se repete todo mês. Elas aparecem na tela Lançar e você confirma com um toque — nada entra sem você mandar.</div>
+  <div id="fix-manage" style="margin-bottom:16px"></div>
+  <div class="row2">
+    <div class="fld"><label>Descrição</label><input type="text" id="fx-desc" placeholder="Aluguel"/></div>
+    <div class="fld"><label>Valor</label><input type="number" id="fx-val" step="0.01" min="0" placeholder="0,00"/></div>
+  </div>
+  <div class="row2">
+    <div class="fld"><label>Tipo</label><select id="fx-kind" onchange="fillFixCats()">
+      <option value="d">Despesa</option><option value="r">Receita</option></select></div>
+    <div class="fld"><label>Dia do mês</label><input type="number" id="fx-day" min="1" max="31" placeholder="10"/></div>
+  </div>
+  <div class="row2">
+    <div class="fld"><label>Categoria</label><select id="fx-cat"></select></div>
+    <div class="fld"><label>Como paga</label><select id="fx-pay"></select></div>
+  </div>
+  <button class="btn btn-go" onclick="addFix()">Adicionar conta fixa</button>
+  <div class="sheet-act"><button class="btn btn-ghost" onclick="closeV('v-fix')">Fechar</button></div>
+</div></div>
+
+<div class="veil" id="v-ant"><div class="sheet">
+  <div class="sheet-t">Antecipar parcelas</div>
+  <input type="hidden" id="an-id"/>
+  <div class="note" id="an-info" style="margin-bottom:14px"></div>
+  <div class="row2">
+    <div class="fld"><label>Quantas</label><input type="number" id="an-qtd" min="1" step="1" oninput="antPreview()"/></div>
+    <div class="fld"><label>Desconto (%)</label><input type="number" id="an-desc" min="0" max="100" step="0.1" oninput="antPreview()"/></div>
+  </div>
+  <div class="note" id="an-prev">Preencha para ver o resultado.</div>
+  <div class="sheet-act">
+    <button class="btn btn-ghost" onclick="closeV('v-ant')">Cancelar</button>
+    <button class="btn btn-go" onclick="confirmAnt()">Confirmar</button>
+  </div>
+</div></div>
+
+<script>
+/* ═══ BANCO — mesmas tabelas do app anterior ═══ */
+const SB_URL="https://mbaglpzidkocemmyyyvf.supabase.co";
+const SB_KEY="sb_publishable_6GQHjwJk0EDR7A-sB75OFw_96zpE1ge";
+
+async function sb(path,opts){
+  opts=opts||{};
+  const res=await fetch(SB_URL+"/rest/v1/"+path,Object.assign({
+    headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,
+      "Content-Type":"application/json","Prefer":opts.prefer!==undefined?opts.prefer:"return=representation"}
+  },opts));
+  if(!res.ok)throw new Error(await res.text());
+  const t=await res.text();
+  return t?JSON.parse(t):[];
+}
+const api={
+  txns:function(){return sb("transacoes?order=data.desc&limit=5000")},
+  addTxn:function(d){return sb("transacoes",{method:"POST",body:JSON.stringify(d)})},
+  updTxn:function(id,d){return sb("transacoes?id=eq."+id,{method:"PATCH",body:JSON.stringify(d)})},
+  delTxn:function(id){return sb("transacoes?id=eq."+id,{method:"DELETE",prefer:""})},
+  delTxnBy:function(p){return sb("transacoes?origem_patrimonio_id=eq."+p,{method:"DELETE",prefer:""})},
+  cards:function(){return sb("cartoes?order=criado_em.asc")},
+  addCard:function(d){return sb("cartoes",{method:"POST",body:JSON.stringify(d)})},
+  updCard:function(id,d){return sb("cartoes?id=eq."+id,{method:"PATCH",body:JSON.stringify(d)})},
+  delCard:function(id){return sb("cartoes?id=eq."+id,{method:"DELETE",prefer:""})},
+  cats:function(t){return sb("categorias?tipo=eq."+t+"&order=criado_em.asc")},
+  addCat:function(d){return sb("categorias",{method:"POST",body:JSON.stringify(d)})},
+  delCat:function(id){return sb("categorias?id=eq."+id,{method:"DELETE",prefer:""})},
+  orcs:function(){return sb("orcamentos")},
+  setOrc:async function(cid,v){
+    const e=await sb("orcamentos?categoria_id=eq."+cid);
+    return e.length?sb("orcamentos?categoria_id=eq."+cid,{method:"PATCH",body:JSON.stringify({valor:v})})
+      :sb("orcamentos",{method:"POST",body:JSON.stringify({categoria_id:cid,valor:v})})},
+  cfg:async function(k){
+    const r=await sb("configuracoes?chave=eq."+encodeURIComponent(k));
+    return r.length?r[0].valor:null},
+  setCfg:async function(k,v){
+    const e=await sb("configuracoes?chave=eq."+encodeURIComponent(k));
+    return e.length?sb("configuracoes?chave=eq."+encodeURIComponent(k),{method:"PATCH",body:JSON.stringify({valor:String(v)})})
+      :sb("configuracoes",{method:"POST",body:JSON.stringify({chave:k,valor:String(v)})})},
+  pat:function(){return sb("patrimonio?order=criado_em.asc")},
+  addPat:function(d){return sb("patrimonio",{method:"POST",body:JSON.stringify(d)})},
+  updPat:function(id,d){return sb("patrimonio?id=eq."+id,{method:"PATCH",body:JSON.stringify(d)})},
+  delPat:function(id){return sb("patrimonio?id=eq."+id,{method:"DELETE",prefer:""})}
+};
+
+/* ═══ estado ═══ */
+const MES=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const D={txns:[],cards:[],catD:[],catR:[],orcs:[],pat:[],fix:[],meta:20};
+const now=new Date();
+let cur={y:now.getFullYear(),m:now.getMonth()};
+let view="add", kind="d", pickedCat=null, pickedPay="dinheiro", editPat=null, filter="all";
+
+/* ═══ utilitários ═══ */
+function brl(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function brlShort(v){
+  const n=Math.abs(Number(v||0));
+  if(n>=1000000)return "R$ "+(n/1000000).toFixed(1).replace(".",",")+"M";
+  if(n>=1000)return "R$ "+(n/1000).toFixed(1).replace(".",",")+"k";
+  return "R$ "+n.toFixed(0);
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function ymNow(){return cur.y+"-"+String(cur.m+1).padStart(2,"0")}
+function ymOf(t){
+  if(t.competencia){const p=String(t.competencia).split("-");return{y:+p[0],m:+p[1]-1}}
+  const d=new Date(t.data+"T12:00:00");return{y:d.getFullYear(),m:d.getMonth()};
+}
+function monthOf(y,m){return D.txns.filter(function(t){const k=ymOf(t);return k.y===y&&k.m===m})}
+function yearOf(y){return D.txns.filter(function(t){return ymOf(t).y===y})}
+function sum(a){return a.reduce(function(s,x){return s+Number(x.valor||0)},0)}
+function rec(a){return sum(a.filter(function(t){return t.tipo==="r"}))}
+function des(a){return sum(a.filter(function(t){return t.tipo==="d"}))}
+function cat(id){
+  const all=D.catD.concat(D.catR);
+  return all.find(function(c){return c.id===id})||{nome:"Sem categoria",icon:"•"};
+}
+function card(id){
+  if(!id||id==="dinheiro")return{nome:"Dinheiro / Pix",cor:"#95A1B8",id:"dinheiro"};
+  return D.cards.find(function(c){return c.id===id})||{nome:"—",cor:"#95A1B8",id:id};
+}
+function orc(cid){const o=D.orcs.find(function(o){return o.categoria_id===cid});return o?Number(o.valor):0}
+function toast(m,ms){
+  const e=document.getElementById("toast");
+  e.textContent=m;e.classList.add("on");clearTimeout(e._t);
+  e._t=setTimeout(function(){e.classList.remove("on")},ms||2600);
+}
+function setSync(s){
+  const e=document.getElementById("sync");
+  e.className="sync "+(s==="ok"?"on":s==="busy"?"busy":"off");
+  e.textContent=s==="ok"?"salvo":s==="busy"?"salvando":"sem conexão";
+}
+function openV(id){document.getElementById(id).classList.add("on")}
+function closeV(id){document.getElementById(id).classList.remove("on")}
+
+/* ═══ navegação ═══ */
+function show(v){
+  view=v;
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("on")});
+  document.getElementById("s-"+v).classList.add("on");
+  document.querySelectorAll(".nav button").forEach(function(b){b.classList.remove("on")});
+  const nb=document.getElementById("n-"+v); if(nb)nb.classList.add("on");
+  document.querySelector(".main").scrollTop=0;
+  draw();
+}
+function mvMonth(d){
+  cur.m+=d;
+  if(cur.m>11){cur.m=0;cur.y++}
+  if(cur.m<0){cur.m=11;cur.y--}
+  draw();
+}
+
+/* ═══ início ═══ */
+async function boot(){
+  try{
+    document.getElementById("boot-tx").textContent="CARREGANDO SEUS DADOS";
+    const r=await Promise.all([
+      api.txns(),api.cards(),api.cats("d"),api.cats("r"),api.orcs(),
+      api.cfg("meta_poupanca").catch(function(){return null}),
+      api.pat().catch(function(){return []}),
+      api.cfg("contas_fixas").catch(function(){return null})
+    ]);
+    D.txns=r[0]||[]; D.cards=r[1]||[]; D.catD=r[2]||[]; D.catR=r[3]||[];
+    D.orcs=r[4]||[]; D.meta=parseInt(r[5])||20; D.pat=r[6]||[];
+    try{D.fix=r[7]?JSON.parse(r[7]):[]}catch(e){D.fix=[]}
+    document.getElementById("a-date").value=new Date().toISOString().slice(0,10);
+    fillKindSelect(); setKind("d"); setSync("ok");
+    document.getElementById("boot").style.display="none";
+    draw();
+  }catch(e){
+    document.getElementById("boot-tx").innerHTML=
+      "NÃO CONSEGUI CONECTAR AO BANCO.<br><br>Se o projeto Supabase estiver pausado, reative no painel e recarregue esta página.<br><br><span style='color:#FF6B6B'>"+esc(e.message).slice(0,180)+"</span>";
+    setSync("off");
+  }
+}
+
+function draw(){
+  document.getElementById("mlbl").textContent=MES[cur.m].slice(0,3)+" "+cur.y;
+  if(view==="add")drawAdd();
+  if(view==="month")drawMonth();
+  if(view==="list")drawList();
+  if(view==="pat")drawPat();
+  if(view==="evo")drawEvo();
+  if(view==="cfg")drawCfg();
+}
+
+/* ═══ LANÇAR ═══ */
+function setKind(k){
+  kind=k;
+  document.getElementById("tg-d").className=k==="d"?"on-d":"";
+  document.getElementById("tg-r").className=k==="r"?"on-r":"";
+  document.getElementById("a-pay-wrap").style.display=k==="d"?"":"none";
+  pickedCat=null;
+  drawAdd(); refreshFatura();
+}
+function drawAdd(){
+  const cats=kind==="d"?D.catD:D.catR;
+  if(!pickedCat&&cats.length)pickedCat=cats[0].id;
+  document.getElementById("a-cats").innerHTML=cats.map(function(c){
+    return '<button class="chip'+(c.id===pickedCat?" on":"")+'" onclick="pickCat(\''+c.id+'\')">'+
+      esc(c.icon)+" "+esc(c.nome)+'</button>'}).join("");
+  const pays=[{id:"dinheiro",nome:"Dinheiro / Pix",cor:"#95A1B8"}].concat(D.cards);
+  document.getElementById("a-pays").innerHTML=pays.map(function(c){
+    return '<button class="chip'+(c.id===pickedPay?" on":"")+'" onclick="pickPay(\''+c.id+'\')">'+
+      '<span style="width:7px;height:7px;border-radius:50%;background:'+esc(c.cor)+';display:inline-block"></span>'+
+      esc(c.nome)+'</button>'}).join("");
+  drawQuick(); drawFix();
+}
+function pickCat(id){pickedCat=id;drawAdd()}
+function pickPay(id){pickedPay=id;drawAdd();refreshFatura()}
+
+function drawQuick(){
+  const recent=D.txns.filter(function(t){return t.tipo===kind&&!t.origem_patrimonio_id}).slice(0,150);
+  const tally={};
+  recent.forEach(function(t){
+    const k=(t.descricao||"").trim().toLowerCase();
+    if(!k)return;
+    if(!tally[k])tally[k]={n:0,t:t};
+    tally[k].n++;
+  });
+  const top=Object.keys(tally).map(function(k){return tally[k]})
+    .filter(function(x){return x.n>1}).sort(function(a,b){return b.n-a.n}).slice(0,8);
+  const w=document.getElementById("quick-wrap");
+  if(!top.length){w.style.display="none";return}
+  w.style.display="";
+  document.getElementById("quick").innerHTML=top.map(function(x){
+    return '<button class="chip" onclick="useQuick(\''+x.t.id+'\')">'+
+      esc(cat(x.t.categoria_id).icon)+" "+esc(x.t.descricao)+'</button>'}).join("");
+}
+function useQuick(id){
+  const t=D.txns.find(function(x){return x.id===id}); if(!t)return;
+  document.getElementById("a-desc").value=t.descricao;
+  pickedCat=t.categoria_id;
+  if(kind==="d")pickedPay=t.cartao_id||"dinheiro";
+  drawAdd(); refreshFatura();
+  document.getElementById("a-val").focus();
+}
+function suggestFatura(dateStr,cardId){
+  const c=card(cardId);
+  const d=new Date((dateStr||new Date().toISOString().slice(0,10))+"T12:00:00");
+  let y=d.getFullYear(),m=d.getMonth();
+  const f=c&&c.dia_fechamento?Number(c.dia_fechamento):0;
+  if(f>0&&d.getDate()>f){m++;if(m>11){m=0;y++}}
+  return y+"-"+String(m+1).padStart(2,"0");
+}
+function refreshFatura(){
+  const isCard=kind==="d"&&pickedPay&&pickedPay!=="dinheiro";
+  document.getElementById("a-fat-wrap").style.display=isCard?"":"none";
+  if(isCard)document.getElementById("a-fat").value=
+    suggestFatura(document.getElementById("a-date").value,pickedPay);
+}
+async function saveEntry(){
+  const valor=parseFloat(document.getElementById("a-val").value);
+  const descricao=document.getElementById("a-desc").value.trim();
+  const data=document.getElementById("a-date").value;
+  if(!valor||valor<=0){toast("Informe o valor");document.getElementById("a-val").focus();return}
+  if(!descricao){toast("Escreva uma descrição");document.getElementById("a-desc").focus();return}
+  if(!data){toast("Escolha a data");return}
+  if(!pickedCat){toast("Escolha uma categoria");return}
+  const isCard=kind==="d"&&pickedPay!=="dinheiro";
+  const novo={descricao:descricao,valor:valor,data:data,tipo:kind,categoria_id:pickedCat,
+    cartao_id:kind==="d"?pickedPay:"dinheiro",
+    competencia:isCard?(document.getElementById("a-fat").value||null):null};
+  const btn=document.getElementById("a-go");
+  btn.disabled=true;btn.textContent="Salvando…";setSync("busy");
+  try{
+    const r=await api.addTxn(novo);
+    D.txns.unshift(r[0]);
+    document.getElementById("a-val").value="";
+    document.getElementById("a-desc").value="";
+    setSync("ok");
+    toast(kind==="r"?"Receita salva":"Despesa salva");
+    draw();
+  }catch(e){setSync("off");toast("Não salvou: "+String(e.message).slice(0,60),4200)}
+  btn.disabled=false;btn.textContent="Salvar lançamento";
+}
+
+/* ═══ CONTAS FIXAS ═══ */
+function fixDone(f){
+  return monthOf(cur.y,cur.m).some(function(t){
+    return (t.descricao||"").trim().toLowerCase()===(f.desc||"").trim().toLowerCase()&&t.tipo===f.kind});
+}
+function drawFix(){
+  const box=document.getElementById("fix-list");
+  if(!D.fix.length){
+    box.innerHTML='<div class="empty"><span class="e">&#8635;</span>Nada fixo ainda.<br>Cadastre aluguel, escola, internet — e lance com um toque todo mês.</div>';
+    return;
+  }
+  const pend=D.fix.filter(function(f){return !fixDone(f)});
+  box.innerHTML=D.fix.map(function(f,i){
+    const done=fixDone(f), c=cat(f.cat);
+    return '<div class="row"><div class="row-ic">'+esc(c.icon)+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(f.desc)+
+      (done?' <span class="tag tag-up">lançada</span>':'')+'</div>'+
+      '<div class="row-sub">dia '+esc(f.day||1)+' · '+esc(card(f.pay).nome)+'</div></div>'+
+      '<div class="row-val" style="color:'+(f.kind==="r"?"var(--up)":"var(--paper)")+'">'+brl(f.val)+'</div>'+
+      (done?'':'<button class="btn btn-go btn-sm" style="width:auto" onclick="launchFix('+i+')">Lançar</button>')+
+      '</div>'}).join("")+
+    (pend.length>1?'<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px" onclick="launchAllFix()">Lançar as '+pend.length+' pendentes</button>':"");
+}
+async function launchFix(i){
+  const f=D.fix[i]; if(!f)return;
+  const day=Math.min(Number(f.day||1),28);
+  const data=cur.y+"-"+String(cur.m+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+  const isCard=f.kind==="d"&&f.pay&&f.pay!=="dinheiro";
+  setSync("busy");
+  try{
+    const r=await api.addTxn({descricao:f.desc,valor:f.val,data:data,tipo:f.kind,
+      categoria_id:f.cat,cartao_id:f.kind==="d"?(f.pay||"dinheiro"):"dinheiro",
+      competencia:isCard?ymNow():null});
+    D.txns.unshift(r[0]); setSync("ok"); toast(f.desc+" lançada"); draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
+}
+async function launchAllFix(){
+  const idx=[];
+  D.fix.forEach(function(f,i){if(!fixDone(f))idx.push(i)});
+  for(const i of idx){await launchFix(i)}
+  toast(idx.length+" contas lançadas");
+}
+function openFix(){fillFixCats();drawFixManage();openV("v-fix")}
+function fillFixCats(){
+  const k=document.getElementById("fx-kind").value;
+  const cats=k==="d"?D.catD:D.catR;
+  document.getElementById("fx-cat").innerHTML=cats.map(function(c){
+    return '<option value="'+c.id+'">'+esc(c.icon)+" "+esc(c.nome)+'</option>'}).join("");
+  document.getElementById("fx-pay").innerHTML='<option value="dinheiro">Dinheiro / Pix</option>'+
+    D.cards.map(function(c){return '<option value="'+c.id+'">'+esc(c.nome)+'</option>'}).join("");
+}
+function drawFixManage(){
+  const b=document.getElementById("fix-manage");
+  b.innerHTML=D.fix.length?D.fix.map(function(f,i){
+    return '<div class="row"><div class="row-ic">'+esc(cat(f.cat).icon)+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(f.desc)+'</div>'+
+      '<div class="row-sub">dia '+esc(f.day||1)+' · '+(f.kind==="r"?"receita":"despesa")+'</div></div>'+
+      '<div class="row-val">'+brl(f.val)+'</div>'+
+      '<button class="row-act" onclick="delFix('+i+')">&#10005;</button></div>'}).join("")
+    :'<div class="empty" style="padding:14px">Nenhuma conta fixa cadastrada.</div>';
+}
+async function persistFix(){
+  setSync("busy");
+  try{await api.setCfg("contas_fixas",JSON.stringify(D.fix));setSync("ok")}
+  catch(e){setSync("off");toast("Erro ao salvar: "+String(e.message).slice(0,60))}
+}
+async function addFix(){
+  const desc=document.getElementById("fx-desc").value.trim();
+  const val=parseFloat(document.getElementById("fx-val").value);
+  const day=parseInt(document.getElementById("fx-day").value)||1;
+  if(!desc){toast("Escreva a descrição");return}
+  if(!val||val<=0){toast("Informe o valor");return}
+  D.fix.push({desc:desc,val:val,day:day,kind:document.getElementById("fx-kind").value,
+    cat:document.getElementById("fx-cat").value,pay:document.getElementById("fx-pay").value});
+  await persistFix();
+  document.getElementById("fx-desc").value="";
+  document.getElementById("fx-val").value="";
+  drawFixManage();drawFix();toast("Conta fixa criada");
+}
+async function delFix(i){D.fix.splice(i,1);await persistFix();drawFixManage();drawFix()}
+
+/* ═══ O MÊS ═══ */
+function drawMonth(){
+  const t=monthOf(cur.y,cur.m), r=rec(t), d=des(t), s=r-d;
+  document.getElementById("m-title").textContent=MES[cur.m]+" de "+cur.y;
+  const pct=r>0?Math.min(100,Math.round(d/r*100)):(d>0?100:0);
+  document.getElementById("m-tide").innerHTML=
+    '<div class="tide '+(s>=0?"pos":"neg")+'">'+
+    '<div class="tide-lbl">'+(s>=0?"sobrou este mês":"faltou este mês")+'</div>'+
+    '<div class="tide-val num" style="color:'+(s>=0?"var(--up)":"var(--down)")+'">'+brl(Math.abs(s))+'</div>'+
+    '<div class="tide-sub">'+brl(r)+' entraram · '+brl(d)+' saíram</div>'+
+    '<div class="gauge"><div class="gauge-bar"><div class="gauge-fill" style="width:'+pct+'%;background:'+
+      (pct<70?"var(--up)":pct<100?"var(--gold)":"var(--down)")+'"></div></div>'+
+    '<div class="gauge-legend"><span>'+pct+'% da renda comprometida</span><span>'+t.length+' lançamentos</span></div>'+
+    '</div></div>';
+
+  const totalOrc=D.orcs.reduce(function(a,o){return a+Number(o.valor)},0);
+  const parc=sum(t.filter(function(x){return x.origem_patrimonio_id}));
+  const need=totalOrc+parc, meta=D.meta||0;
+  const eq=need>0?need/(1-meta/100):0;
+  const box=document.getElementById("m-eq");
+  if(eq>0){
+    const falta=Math.max(0,eq-r), sobra=r-eq;
+    box.innerHTML='<div class="note">'+
+      '<div class="l"><span>Contas previstas</span><b>'+brl(totalOrc)+'</b></div>'+
+      '<div class="l"><span>Parcelas de financiamento</span><b>'+brl(parc)+'</b></div>'+
+      '<div class="l"><span>Guardar '+meta+'%</span><b>'+brl(eq-need)+'</b></div>'+
+      '<div class="l" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
+        '<span>Preciso ganhar</span><b class="num">'+brl(eq)+'</b></div>'+
+      '<div class="l"><span>Ganhei</span><b class="num" style="color:'+(r>=eq?"var(--up)":"var(--down)")+'">'+brl(r)+'</b></div>'+
+      '</div><div style="margin-top:10px;text-align:center">'+
+      (r>=eq?'<span class="tag tag-up">no azul · sobra '+brl(sobra)+'</span>'
+            :'<span class="tag tag-down">faltam '+brl(falta)+' para o equilíbrio</span>')+'</div>';
+  }else{
+    box.innerHTML='<div class="empty"><span class="e">&#9675;</span>Defina limites por categoria em Ajustes para ver quanto precisa ganhar.</div>';
+  }
+
+  const dt=t.filter(function(x){return x.tipo==="d"}), byC={};
+  dt.forEach(function(x){const k=x.cartao_id||"dinheiro";byC[k]=(byC[k]||0)+Number(x.valor)});
+  const listC=Object.keys(byC).map(function(k){return[k,byC[k]]}).sort(function(a,b){return b[1]-a[1]});
+  const totC=listC.reduce(function(a,x){return a+x[1]},0);
+  document.getElementById("m-cards").innerHTML=listC.length?listC.map(function(x){
+    const c=card(x[0]), p=totC>0?Math.round(x[1]/totC*100):0;
+    const venc=c.dia_vencimento?" · vence dia "+c.dia_vencimento:"";
+    return '<div class="row"><div class="row-ic" style="background:'+esc(c.cor)+'22;color:'+esc(c.cor)+'">&#9646;</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(c.nome)+'</div>'+
+      '<div class="row-sub">'+p+'% dos gastos'+venc+'</div>'+
+      '<div class="bar"><i style="width:'+p+'%;background:'+esc(c.cor)+'"></i></div></div>'+
+      '<div class="row-val" style="color:'+esc(c.cor)+'">'+brl(x[1])+'</div></div>'}).join("")
+    :'<div class="empty"><span class="e">&#9646;</span>Nenhuma despesa neste mês.</div>';
+
+  const byCat={};
+  dt.forEach(function(x){byCat[x.categoria_id]=(byCat[x.categoria_id]||0)+Number(x.valor)});
+  const listCat=Object.keys(byCat).map(function(k){return[k,byCat[k]]}).sort(function(a,b){return b[1]-a[1]});
+  const totCat=listCat.reduce(function(a,x){return a+x[1]},0);
+  document.getElementById("m-cats").innerHTML=listCat.length?listCat.map(function(x){
+    const c=cat(x[0]), p=totCat>0?Math.round(x[1]/totCat*100):0;
+    return '<div class="row"><div class="row-ic">'+esc(c.icon)+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(c.nome)+'</div>'+
+      '<div class="bar"><i style="width:'+p+'%;background:var(--gold)"></i></div>'+
+      '<div class="row-sub">'+p+'% do total</div></div>'+
+      '<div class="row-val">'+brl(x[1])+'</div></div>'}).join("")
+    :'<div class="empty"><span class="e">&#9684;</span>Sem gastos para mostrar.</div>';
+
+  const withOrc=D.catD.filter(function(c){return orc(c.id)>0});
+  document.getElementById("m-budget").innerHTML=withOrc.length?withOrc.map(function(c){
+    const gasto=byCat[c.id]||0, lim=orc(c.id), p=Math.min(100,Math.round(gasto/lim*100)), over=gasto>lim;
+    return '<div class="row"><div class="row-ic">'+esc(c.icon)+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(c.nome)+(over?' <span class="tag tag-down">estourou</span>':'')+'</div>'+
+      '<div class="bar"><i style="width:'+p+'%;background:'+(over?"var(--down)":p>85?"var(--gold)":"var(--up)")+'"></i></div>'+
+      '<div class="row-sub">'+brl(gasto)+' de '+brl(lim)+'</div></div>'+
+      '<div class="row-val" style="color:'+(over?"var(--down)":"var(--paper2)")+'">'+p+'%</div></div>'}).join("")
+    :'<div class="empty"><span class="e">&#9671;</span>Sem limites definidos.<br>Configure em Ajustes.</div>';
+}
+
+/* ═══ EXTRATO ═══ */
+function drawList(){
+  const t=monthOf(cur.y,cur.m);
+  const fs=[{k:"all",l:"Tudo"},{k:"r",l:"Entradas"},{k:"d",l:"Saídas"},{k:"dinheiro",l:"Dinheiro / Pix"}]
+    .concat(D.cards.map(function(c){return{k:c.id,l:c.nome}}));
+  document.getElementById("l-filters").innerHTML=fs.map(function(f){
+    return '<button class="chip'+(filter===f.k?" on":"")+'" onclick="setFilter(\''+f.k+'\')">'+esc(f.l)+'</button>'}).join("");
+  let list=t;
+  if(filter==="r")list=t.filter(function(x){return x.tipo==="r"});
+  else if(filter==="d")list=t.filter(function(x){return x.tipo==="d"});
+  else if(filter!=="all")list=t.filter(function(x){return (x.cartao_id||"dinheiro")===filter});
+  list=list.slice().sort(function(a,b){return String(b.data).localeCompare(String(a.data))});
+  document.getElementById("l-count").textContent=
+    MES[cur.m]+" "+cur.y+" — "+list.length+" lançamento"+(list.length===1?"":"s");
+  document.getElementById("l-rows").innerHTML=list.length?list.map(function(x){
+    const c=cat(x.categoria_id), pay=x.tipo==="d"?card(x.cartao_id):null;
+    const d=new Date(x.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
+    const fat=x.competencia?" · fatura "+String(x.competencia).split("-").reverse().join("/"):"";
+    return '<div class="row"><div class="row-ic">'+esc(c.icon)+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(x.descricao)+
+      (x.origem_patrimonio_id?' <span class="tag tag-gold">parcela</span>':'')+'</div>'+
+      '<div class="row-sub">'+d+' · '+esc(c.nome)+(pay?" · "+esc(pay.nome):"")+fat+'</div></div>'+
+      '<div class="row-val" style="color:'+(x.tipo==="r"?"var(--up)":"var(--down)")+'">'+
+        (x.tipo==="r"?"+":"−")+brl(x.valor)+'</div>'+
+      '<button class="row-act" onclick="openTxn(\''+x.id+'\')">&#9998;</button>'+
+      '<button class="row-act" onclick="delTxn(\''+x.id+'\')">&#10005;</button></div>'}).join("")
+    :'<div class="empty"><span class="e">&#8801;</span>Nenhum lançamento aqui.<br>Use a aba Lançar para começar.</div>';
+}
+function setFilter(f){filter=f;drawList()}
+function openTxn(id){
+  const t=D.txns.find(function(x){return x.id===id}); if(!t)return;
+  document.getElementById("e-id").value=t.id;
+  document.getElementById("e-kind").value=t.tipo;
+  document.getElementById("e-date").value=t.data;
+  document.getElementById("e-val").value=t.valor;
+  document.getElementById("e-desc").value=t.descricao;
+  const cats=t.tipo==="r"?D.catR:D.catD;
+  document.getElementById("e-cat").innerHTML=cats.map(function(c){
+    return '<option value="'+c.id+'"'+(c.id===t.categoria_id?" selected":"")+'>'+
+      esc(c.icon)+" "+esc(c.nome)+'</option>'}).join("");
+  document.getElementById("e-pay").innerHTML=
+    '<option value="dinheiro"'+((t.cartao_id||"dinheiro")==="dinheiro"?" selected":"")+'>Dinheiro / Pix</option>'+
+    D.cards.map(function(c){return '<option value="'+c.id+'"'+(c.id===t.cartao_id?" selected":"")+'>'+esc(c.nome)+'</option>'}).join("");
+  const isCard=t.tipo==="d"&&t.cartao_id&&t.cartao_id!=="dinheiro";
+  document.getElementById("e-fat-wrap").style.display=isCard?"":"none";
+  document.getElementById("e-fat").value=t.competencia||suggestFatura(t.data,t.cartao_id);
+  openV("v-txn");
+}
+async function saveTxnEdit(){
+  const id=document.getElementById("e-id").value;
+  const tipo=document.getElementById("e-kind").value;
+  const valor=parseFloat(document.getElementById("e-val").value);
+  const descricao=document.getElementById("e-desc").value.trim();
+  const data=document.getElementById("e-date").value;
+  const categoria_id=document.getElementById("e-cat").value;
+  const cartao_id=tipo==="d"?document.getElementById("e-pay").value:"dinheiro";
+  if(!valor||valor<=0){toast("Informe o valor");return}
+  if(!descricao){toast("Escreva a descrição");return}
+  const isCard=tipo==="d"&&cartao_id!=="dinheiro";
+  const competencia=isCard?(document.getElementById("e-fat").value||null):null;
+  setSync("busy");
+  try{
+    const u=await api.updTxn(id,{valor:valor,descricao:descricao,data:data,
+      categoria_id:categoria_id,cartao_id:cartao_id,competencia:competencia});
+    const i=D.txns.findIndex(function(x){return x.id===id});
+    if(i>=0)D.txns[i]=u[0]||Object.assign({},D.txns[i],{valor:valor,descricao:descricao,
+      data:data,categoria_id:categoria_id,cartao_id:cartao_id,competencia:competencia});
+    closeV("v-txn");setSync("ok");toast("Lançamento atualizado");draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
+}
+async function delTxn(id){
+  if(!confirm("Apagar este lançamento?"))return;
+  setSync("busy");
+  try{
+    await api.delTxn(id);
+    D.txns=D.txns.filter(function(x){return x.id!==id});
+    setSync("ok");toast("Apagado");draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
+}
+
+/* ═══ PATRIMÔNIO ═══ */
+const KINDS={
+  investimento:{i:"&#9670;",l:"Investimento",asset:true},
+  imovel:{i:"&#8962;",l:"Imóvel",asset:true},
+  veiculo:{i:"&#9973;",l:"Veículo",asset:true},
+  poupanca:{i:"&#9673;",l:"Reserva / Poupança",asset:true},
+  financiamento:{i:"&#9906;",l:"Financiamento",asset:false},
+  consorcio:{i:"&#8862;",l:"Consórcio",asset:false},
+  parcelamento:{i:"&#9636;",l:"Parcelamento",asset:false},
+  emprestimo:{i:"&#8856;",l:"Empréstimo",asset:false}
+};
+function isDebt(k){return KINDS[k]&&!KINDS[k].asset}
+function fillKindSelect(){
+  document.getElementById("p-kind").innerHTML=Object.keys(KINDS).map(function(k){
+    return '<option value="'+k+'">'+KINDS[k].l+'</option>'}).join("");
+  onKindChange();
+}
+function onKindChange(){
+  const k=document.getElementById("p-kind").value, dbt=isDebt(k);
+  document.getElementById("p-parc-wrap").style.display=dbt?"":"none";
+  document.getElementById("p-count-wrap").style.display=dbt?"":"none";
+  document.getElementById("p-first-wrap").style.display=dbt?"":"none";
+  document.getElementById("p-val-lbl").textContent=dbt?"Valor do bem":"Valor atual";
+  if(dbt&&!document.getElementById("p-first").value)
+    document.getElementById("p-first").value=ymNow();
+  patPreview();
+}
+function patPreview(){
+  const k=document.getElementById("p-kind").value, box=document.getElementById("p-preview");
+  if(!isDebt(k)){box.style.display="none";return}
+  const bem=parseFloat(document.getElementById("p-val").value)||0;
+  const pm=parseFloat(document.getElementById("p-parc").value)||0;
+  const tot=parseInt(document.getElementById("p-total").value)||0;
+  const paid=parseInt(document.getElementById("p-paid").value)||0;
+  if(pm<=0||tot<=0){box.style.display="none";return}
+  const total=pm*tot, juros=total-bem, falta=Math.max(0,tot-paid);
+  box.style.display="";
+  box.innerHTML='<div class="note">'+
+    '<div class="l"><span>Valor do bem</span><b>'+brl(bem)+'</b></div>'+
+    '<div class="l"><span>Total a pagar ('+tot+'×)</span><b>'+brl(total)+'</b></div>'+
+    '<div class="l"><span>Juros</span><b style="color:'+(juros>0?"var(--down)":"var(--up)")+'">'+
+      brl(juros)+(bem>0?" · "+Math.round(juros/bem*100)+"%":"")+'</b></div>'+
+    '<div class="l" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
+      '<span>Ainda devo ('+falta+'×)</span><b style="color:var(--gold)">'+brl(falta*pm)+'</b></div></div>';
+}
+function patForm(){
+  const tipo=document.getElementById("p-kind").value, dbt=isDebt(tipo);
+  const valor=parseFloat(document.getElementById("p-val").value)||0;
+  return{tipo:tipo,descricao:document.getElementById("p-desc").value.trim(),valor:valor,
+    valor_bem:dbt?valor:null,
+    parcela_mensal:dbt?(parseFloat(document.getElementById("p-parc").value)||0):0,
+    parcelas_pagas:dbt?(parseInt(document.getElementById("p-paid").value)||0):0,
+    parcelas_total:dbt?(parseInt(document.getElementById("p-total").value)||0):0};
+}
+function resetPatForm(){
+  editPat=null;
+  ["p-desc","p-val","p-parc","p-paid","p-total"].forEach(function(i){document.getElementById(i).value=""});
+  document.getElementById("p-first").value=ymNow();
+  document.getElementById("p-form-t").textContent="Adicionar";
+  document.getElementById("p-save").textContent="Adicionar";
+  document.getElementById("p-cancel").style.display="none";
+  document.getElementById("p-preview").style.display="none";
+}
+async function makeParcels(item,firstYM){
+  const pm=Number(item.parcela_mensal||0), tot=Number(item.parcelas_total||0);
+  if(pm<=0||tot<=0)return;
+  let catFin=D.catD.find(function(c){return /financ|banc|d[íi]vid|parcel/i.test(c.nome)});
+  if(!catFin)catFin=D.catD[0];
+  if(!catFin)return;
+  const p=String(firstYM||ymNow()).split("-");
+  let y=+p[0], m=+p[1]-1;
+  const rows=[];
+  for(let i=0;i<tot;i++){
+    const comp=y+"-"+String(m+1).padStart(2,"0");
+    rows.push({descricao:item.descricao+" ("+(i+1)+"/"+tot+")",valor:pm,
+      data:comp+"-05",tipo:"d",categoria_id:catFin.id,cartao_id:"dinheiro",
+      competencia:comp,origem_patrimonio_id:item.id});
+    m++;if(m>11){m=0;y++}
+  }
+  for(let i=0;i<rows.length;i+=50){
+    const feito=await api.addTxn(rows.slice(i,i+50));
+    (feito||[]).forEach(function(t){D.txns.unshift(t)});
+  }
+}
+async function savePat(){
+  const d=patForm();
+  if(!d.descricao){toast("Escreva a descrição");return}
+  if(!d.valor||d.valor<=0){toast("Informe o valor");return}
+  const first=document.getElementById("p-first").value||ymNow();
+  setSync("busy");
+  try{
+    if(editPat){
+      const u=await api.updPat(editPat,d);
+      const item=u[0]||Object.assign({},D.pat.find(function(p){return p.id===editPat}),d,{id:editPat});
+      const i=D.pat.findIndex(function(p){return p.id===editPat});
+      if(i>=0)D.pat[i]=item;
+      if(isDebt(item.tipo)){
+        try{await api.delTxnBy(item.id);
+          D.txns=D.txns.filter(function(t){return t.origem_patrimonio_id!==item.id})}catch(e){}
+        await makeParcels(item,first);
+      }
+      toast("Atualizado");
+    }else{
+      const n=await api.addPat(d);
+      D.pat.push(n[0]);
+      if(isDebt(n[0].tipo)){
+        await makeParcels(n[0],first);
+        toast("Cadastrado e parcelas lançadas",3800);
+      }else toast("Cadastrado");
+    }
+    resetPatForm(); setSync("ok"); draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,80),4600)}
+}
+function editPatItem(id){
+  const p=D.pat.find(function(x){return x.id===id}); if(!p)return;
+  editPat=id;
+  document.getElementById("p-kind").value=p.tipo;
+  document.getElementById("p-desc").value=p.descricao;
+  document.getElementById("p-val").value=p.valor_bem||p.valor;
+  document.getElementById("p-parc").value=p.parcela_mensal||"";
+  document.getElementById("p-paid").value=p.parcelas_pagas||"";
+  document.getElementById("p-total").value=p.parcelas_total||"";
+  const comps=D.txns.filter(function(t){return t.origem_patrimonio_id===id&&t.competencia})
+    .map(function(t){return t.competencia}).sort();
+  document.getElementById("p-first").value=comps[0]||ymNow();
+  onKindChange();
+  document.getElementById("p-form-t").textContent="Editando "+p.descricao;
+  document.getElementById("p-save").textContent="Salvar";
+  document.getElementById("p-cancel").style.display="";
+  document.getElementById("p-kind").scrollIntoView({behavior:"smooth",block:"center"});
+}
+async function delPatItem(id){
+  const p=D.pat.find(function(x){return x.id===id});
+  if(!p)return;
+  const msg=isDebt(p.tipo)?"Isso apaga também as parcelas lançadas nos meses. Continuar?":"Apagar "+p.descricao+"?";
+  if(!confirm(msg))return;
+  setSync("busy");
+  try{
+    try{await api.delTxnBy(id);
+      D.txns=D.txns.filter(function(t){return t.origem_patrimonio_id!==id})}catch(e){}
+    await api.delPat(id);
+    D.pat=D.pat.filter(function(x){return x.id!==id});
+    if(editPat===id)resetPatForm();
+    setSync("ok");toast("Removido");draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
+}
+function drawPat(){
+  const assets=D.pat.filter(function(p){return KINDS[p.tipo]&&KINDS[p.tipo].asset});
+  const debts=D.pat.filter(function(p){return isDebt(p.tipo)});
+  const tA=sum(assets)+debts.reduce(function(s,p){return s+Number(p.valor_bem||0)},0);
+  const tD=debts.reduce(function(s,p){
+    const pg=Number(p.parcelas_pagas||0),tt=Number(p.parcelas_total||0),pm=Number(p.parcela_mensal||0);
+    return s+(tt>0?Math.max(0,tt-pg)*pm:Number(p.valor))},0);
+  const tJ=debts.reduce(function(s,p){
+    const pm=Number(p.parcela_mensal||0),tt=Number(p.parcelas_total||0),bm=Number(p.valor_bem||0);
+    return s+((pm>0&&tt>0&&bm>0)?Math.max(0,pm*tt-bm):0)},0);
+  const liq=tA-tD;
+  document.getElementById("p-totals").innerHTML=
+    '<div class="tide '+(liq>=0?"pos":"neg")+'">'+
+    '<div class="tide-lbl">patrimônio líquido</div>'+
+    '<div class="tide-val num" style="color:'+(liq>=0?"var(--up)":"var(--down)")+'">'+brl(liq)+'</div>'+
+    '<div class="tide-sub">'+brl(tA)+' em bens · '+brl(tD)+' em dívidas</div>'+
+    (tJ>0?'<div style="margin-top:12px"><span class="tag tag-gold">'+brl(tJ)+' em juros ao longo dos contratos</span></div>':'')+
+    '</div>';
+  const assetRows=assets.map(function(p){
+    return '<div class="row"><div class="row-ic">'+KINDS[p.tipo].i+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(p.descricao)+'</div>'+
+      '<div class="row-sub">'+KINDS[p.tipo].l+'</div></div>'+
+      '<div class="row-val" style="color:var(--up)">'+brl(p.valor)+'</div>'+
+      '<button class="row-act" onclick="editPatItem(\''+p.id+'\')">&#9998;</button>'+
+      '<button class="row-act" onclick="delPatItem(\''+p.id+'\')">&#10005;</button></div>'}).join("")+
+    debts.filter(function(p){return Number(p.valor_bem||0)>0}).map(function(p){
+      return '<div class="row"><div class="row-ic">'+KINDS[p.tipo].i+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(p.descricao)+'</div>'+
+      '<div class="row-sub">'+KINDS[p.tipo].l+' · financiado</div></div>'+
+      '<div class="row-val" style="color:var(--up)">'+brl(p.valor_bem)+'</div></div>'}).join("");
+  document.getElementById("p-assets").innerHTML=assetRows||
+    '<div class="empty"><span class="e">&#9670;</span>Nada cadastrado ainda.</div>';
+  document.getElementById("p-debts").innerHTML=debts.length?debts.map(function(p){
+    const pg=Number(p.parcelas_pagas||0),tt=Number(p.parcelas_total||0),
+      pm=Number(p.parcela_mensal||0),bm=Number(p.valor_bem||0);
+    const falta=tt>0?Math.max(0,tt-pg):0, quit=tt>0&&pg>=tt;
+    const saldo=tt>0?falta*pm:Number(p.valor);
+    const juros=(pm>0&&tt>0&&bm>0)?Math.max(0,pm*tt-bm):0;
+    const prog=tt>0?Math.round(pg/tt*100):0;
+    return '<div class="row"><div class="row-ic">'+KINDS[p.tipo].i+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(p.descricao)+
+        (quit?' <span class="tag tag-up">quitado</span>':'')+'</div>'+
+      '<div class="row-sub">'+(tt>0?pg+" de "+tt+" pagas · "+brl(pm)+"/mês":KINDS[p.tipo].l)+'</div>'+
+      (bm>0?'<div class="row-sub">bem '+brlShort(bm)+' · juros '+brlShort(juros)+'</div>':'')+
+      (tt>0?'<div class="bar"><i style="width:'+prog+'%;background:'+(quit?"var(--up)":"var(--gold)")+'"></i></div>':'')+
+      '</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">'+
+      '<div class="row-val" style="color:'+(quit?"var(--paper3)":"var(--down)")+'">'+brl(saldo)+'</div>'+
+      (!quit&&tt>0?'<button class="btn btn-ghost btn-sm" onclick="openAnt(\''+p.id+'\')">Antecipar</button>':'')+
+      '</div><button class="row-act" onclick="editPatItem(\''+p.id+'\')">&#9998;</button>'+
+      '<button class="row-act" onclick="delPatItem(\''+p.id+'\')">&#10005;</button></div>'}).join("")
+    :'<div class="empty"><span class="e">&#9906;</span>Sem dívidas. Que bom!</div>';
+}
+function openAnt(id){
+  const p=D.pat.find(function(x){return x.id===id}); if(!p)return;
+  document.getElementById("an-id").value=id;
+  const pg=Number(p.parcelas_pagas||0),tt=Number(p.parcelas_total||0),pm=Number(p.parcela_mensal||0);
+  document.getElementById("an-info").innerHTML=
+    "<b>"+esc(p.descricao)+"</b><br>Faltam "+Math.max(0,tt-pg)+" parcelas de "+brl(pm);
+  document.getElementById("an-qtd").value="";
+  document.getElementById("an-desc").value="";
+  document.getElementById("an-prev").textContent="Preencha para ver o resultado.";
+  openV("v-ant");
+}
+function antPreview(){
+  const p=D.pat.find(function(x){return x.id===document.getElementById("an-id").value});
+  if(!p)return;
+  const pm=Number(p.parcela_mensal||0);
+  const q=parseInt(document.getElementById("an-qtd").value)||0;
+  const dc=parseFloat(document.getElementById("an-desc").value)||0;
+  if(q<=0){document.getElementById("an-prev").textContent="Informe quantas parcelas.";return}
+  const bruto=q*pm, econ=bruto*(dc/100);
+  document.getElementById("an-prev").innerHTML=
+    '<div class="l"><span>'+q+' × '+brl(pm)+'</span><b>'+brl(bruto)+'</b></div>'+
+    '<div class="l"><span>Desconto '+dc+'%</span><b style="color:var(--up)">− '+brl(econ)+'</b></div>'+
+    '<div class="l" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
+    '<span>Você paga</span><b>'+brl(bruto-econ)+'</b></div>';
+}
+async function confirmAnt(){
+  const id=document.getElementById("an-id").value;
+  const p=D.pat.find(function(x){return x.id===id}); if(!p)return;
+  const pg=Number(p.parcelas_pagas||0),tt=Number(p.parcelas_total||0),pm=Number(p.parcela_mensal||0);
+  const q=parseInt(document.getElementById("an-qtd").value)||0;
+  const dc=parseFloat(document.getElementById("an-desc").value)||0;
+  if(q<=0){toast("Informe quantas parcelas");return}
+  if(q>Math.max(0,tt-pg)){toast("Só faltam "+Math.max(0,tt-pg));return}
+  setSync("busy");
+  try{
+    const novo=pg+q;
+    const u=await api.updPat(id,{parcelas_pagas:novo});
+    const i=D.pat.findIndex(function(x){return x.id===id});
+    if(i>=0)D.pat[i]=u[0]||Object.assign({},D.pat[i],{parcelas_pagas:novo});
+    const futuras=D.txns.filter(function(t){return t.origem_patrimonio_id===id&&t.competencia})
+      .sort(function(a,b){return String(b.competencia).localeCompare(String(a.competencia))}).slice(0,q);
+    for(const f of futuras){
+      try{await api.delTxn(f.id);D.txns=D.txns.filter(function(x){return x.id!==f.id})}catch(e){}
+    }
+    closeV("v-ant");setSync("ok");
+    toast(q+" parcelas antecipadas · economia de "+brl(q*pm*(dc/100)),4200);
+    draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
+}
+
+/* ═══ EVOLUÇÃO ═══ */
+function years(){
+  const s={};
+  D.txns.forEach(function(t){s[ymOf(t).y]=1});
+  s[now.getFullYear()]=1;
+  return Object.keys(s).map(Number).sort(function(a,b){return a-b});
+}
+function drawEvo(){
+  const ys=years();
+  const data=ys.map(function(y){
+    const t=yearOf(y);return{y:y,r:rec(t),d:des(t),n:t.length}});
+  const max=Math.max.apply(null,data.map(function(x){return Math.max(x.r,x.d)}).concat([1]));
+  document.getElementById("e-bars").innerHTML=
+    '<div class="ybar">'+data.map(function(x){
+      return '<div class="ybar-col"><div class="ybar-pair">'+
+        '<i style="height:'+Math.max(2,Math.round(x.r/max*64))+'px;background:var(--up)"></i>'+
+        '<i style="height:'+Math.max(2,Math.round(x.d/max*64))+'px;background:var(--down)"></i>'+
+        '</div><div class="ybar-lbl">'+x.y+'</div></div>'}).join("")+'</div>'+
+    '<div class="gauge-legend" style="margin-top:10px"><span style="color:var(--up)">&#9646; entradas</span>'+
+    '<span style="color:var(--down)">&#9646; saídas</span></div>';
+
+  document.getElementById("e-table").innerHTML=data.length?data.map(function(x,i){
+    const s=x.r-x.d, prev=i>0?data[i-1]:null;
+    const gr=(prev&&prev.r>0)?Math.round((x.r-prev.r)/prev.r*100):null;
+    const gs=prev?(x.r-x.d)-(prev.r-prev.d):null;
+    return '<div class="row"><div class="row-ic mono" style="font-size:12px;font-weight:600">'+String(x.y).slice(2)+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+x.y+
+      (gr!==null?' <span class="tag '+(gr>=0?"tag-up":"tag-down")+'">'+(gr>=0?"+":"")+gr+'% renda</span>':'')+'</div>'+
+      '<div class="row-sub">'+brlShort(x.r)+' entraram · '+brlShort(x.d)+' saíram · '+x.n+' lançamentos</div>'+
+      (gs!==null?'<div class="row-sub" style="color:'+(gs>=0?"var(--up)":"var(--down)")+'">'+
+        (gs>=0?"sobrou ":"sobrou ")+brlShort(Math.abs(gs))+(gs>=0?" a mais":" a menos")+' que em '+prev.y+'</div>':'')+
+      '</div><div class="row-val" style="color:'+(s>=0?"var(--up)":"var(--down)")+'">'+brlShort(s)+'</div></div>'}).join("")
+    :'<div class="empty"><span class="e">&#9645;</span>Ainda não há anos para comparar.</div>';
+
+  const rows=D.catD.map(function(c){
+    const per=ys.map(function(y){
+      return sum(yearOf(y).filter(function(t){return t.tipo==="d"&&t.categoria_id===c.id}))});
+    return{c:c,per:per,tot:per.reduce(function(a,b){return a+b},0)}})
+    .filter(function(r){return r.tot>0})
+    .sort(function(a,b){return b.tot-a.tot}).slice(0,10);
+  document.getElementById("e-cats").innerHTML=rows.length?
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">'+
+    '<thead><tr><th style="text-align:left;padding:6px 8px 8px 0;color:var(--paper3);font-weight:600">Categoria</th>'+
+    ys.map(function(y){return '<th class="mono" style="text-align:right;padding:6px 0 8px 10px;color:var(--paper3);font-weight:500;font-size:10px">'+y+'</th>'}).join("")+
+    '</tr></thead><tbody>'+rows.map(function(r){
+      return '<tr style="border-top:1px solid var(--line)">'+
+        '<td style="padding:9px 8px 9px 0;white-space:nowrap">'+esc(r.c.icon)+" "+esc(r.c.nome)+'</td>'+
+        r.per.map(function(v){return '<td class="num" style="text-align:right;padding:9px 0 9px 10px;color:'+
+          (v>0?"var(--paper)":"var(--paper3)")+'">'+(v>0?brlShort(v):"—")+'</td>'}).join("")+'</tr>'}).join("")+
+    '</tbody></table></div>'
+    :'<div class="empty"><span class="e">&#9684;</span>Sem despesas categorizadas ainda.</div>';
+}
+
+/* ═══ AJUSTES ═══ */
+function drawCfg(){
+  document.getElementById("c-save").value=D.meta;
+  document.getElementById("c-cards").innerHTML=D.cards.length?D.cards.map(function(c){
+    const dias=[c.dia_fechamento?"fecha "+c.dia_fechamento:"",c.dia_vencimento?"vence "+c.dia_vencimento:""]
+      .filter(Boolean).join(" · ")||"sem datas definidas";
+    return '<div class="row"><div class="row-ic" style="background:'+esc(c.cor)+'22;color:'+esc(c.cor)+'">&#9646;</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(c.nome)+'</div><div class="row-sub">'+dias+'</div></div>'+
+      '<button class="row-act" onclick="openCard(\''+c.id+'\')">&#9998;</button>'+
+      '<button class="row-act" onclick="delCard(\''+c.id+'\')">&#10005;</button></div>'}).join("")
+    :'<div class="empty" style="padding:16px">Nenhum cartão. Crie um para separar as faturas.</div>';
+  function catRow(c,t){
+    return '<div class="row"><div class="row-ic">'+esc(c.icon)+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(c.nome)+'</div></div>'+
+      '<button class="row-act" onclick="delCat(\''+c.id+'\',\''+t+'\')">&#10005;</button></div>';
+  }
+  document.getElementById("c-catd").innerHTML=
+    D.catD.map(function(c){return catRow(c,"d")}).join("")||'<div class="empty" style="padding:16px">Nenhuma.</div>';
+  document.getElementById("c-catr").innerHTML=
+    D.catR.map(function(c){return catRow(c,"r")}).join("")||'<div class="empty" style="padding:16px">Nenhuma.</div>';
+  document.getElementById("c-budget").innerHTML=D.catD.length?D.catD.map(function(c){
+    return '<div class="row"><div class="row-ic">'+esc(c.icon)+'</div>'+
+      '<div class="row-mid"><div class="row-nm">'+esc(c.nome)+'</div></div>'+
+      '<input type="number" value="'+(orc(c.id)||"")+'" placeholder="0" min="0" step="50" '+
+      'onchange="setOrcVal(\''+c.id+'\',this.value)" '+
+      'style="width:104px;background:var(--ink3);border:1px solid var(--line);color:var(--paper);'+
+      'padding:8px 10px;border-radius:var(--r8);font-size:13px;font-family:inherit;text-align:right"/></div>'}).join("")
+    :'<div class="empty" style="padding:16px">Crie categorias primeiro.</div>';
+}
+function openCard(id){
+  document.getElementById("cd-id").value=id||"";
+  const c=id?D.cards.find(function(x){return x.id===id}):null;
+  document.getElementById("cd-t").textContent=c?"Editar cartão":"Novo cartão";
+  document.getElementById("cd-nome").value=c?c.nome:"";
+  document.getElementById("cd-fec").value=(c&&c.dia_fechamento)?c.dia_fechamento:"";
+  document.getElementById("cd-ven").value=(c&&c.dia_vencimento)?c.dia_vencimento:"";
+  document.getElementById("cd-cor").value=c?c.cor:"#E9B949";
+  openV("v-card");
+}
+async function saveCard(){
+  const id=document.getElementById("cd-id").value;
+  const nome=document.getElementById("cd-nome").value.trim();
+  if(!nome){toast("Dê um nome ao cartão");return}
+  const f=document.getElementById("cd-fec").value, v=document.getElementById("cd-ven").value;
+  const d={nome:nome,cor:document.getElementById("cd-cor").value,
+    dia_fechamento:f?parseInt(f):null,dia_vencimento:v?parseInt(v):null};
+  setSync("busy");
+  try{
+    if(id){
+      const u=await api.updCard(id,d);
+      const i=D.cards.findIndex(function(c){return c.id===id});
+      if(i>=0)D.cards[i]=u[0]||Object.assign({},D.cards[i],d);
+    }else{
+      const n=await api.addCard(d); D.cards.push(n[0]);
+    }
+    closeV("v-card");setSync("ok");toast("Cartão salvo");draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,70),4200)}
+}
+async function delCard(id){
+  if(!confirm("Remover este cartão? Os lançamentos dele continuam no extrato."))return;
+  setSync("busy");
+  try{
+    await api.delCard(id);
+    D.cards=D.cards.filter(function(c){return c.id!==id});
+    setSync("ok");draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
+}
+function openCat(t){
+  document.getElementById("ct-kind").value=t;
+  document.getElementById("ct-icon").value="";
+  document.getElementById("ct-nome").value="";
+  openV("v-cat");
+}
+async function saveCat(){
+  const tipo=document.getElementById("ct-kind").value;
+  const nome=document.getElementById("ct-nome").value.trim();
+  const icon=document.getElementById("ct-icon").value.trim()||"•";
+  if(!nome){toast("Dê um nome à categoria");return}
+  setSync("busy");
+  try{
+    const n=await api.addCat({nome:nome,icon:icon,tipo:tipo});
+    (tipo==="d"?D.catD:D.catR).push(n[0]);
+    closeV("v-cat");setSync("ok");toast("Categoria criada");draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
+}
+async function delCat(id,t){
+  if(!confirm("Apagar esta categoria?"))return;
+  setSync("busy");
+  try{
+    await api.delCat(id);
+    if(t==="d")D.catD=D.catD.filter(function(c){return c.id!==id});
+    else D.catR=D.catR.filter(function(c){return c.id!==id});
+    setSync("ok");draw();
+  }catch(e){setSync("off");toast("Não deu: talvez existam lançamentos nesta categoria",4000)}
+}
+async function setOrcVal(cid,v){
+  const valor=parseFloat(v)||0;
+  setSync("busy");
+  try{
+    await api.setOrc(cid,valor);
+    const i=D.orcs.findIndex(function(o){return o.categoria_id===cid});
+    if(i>=0)D.orcs[i].valor=valor; else D.orcs.push({categoria_id:cid,valor:valor});
+    setSync("ok");
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
+}
+async function saveMeta(v){
+  D.meta=parseInt(v)||0;
+  setSync("busy");
+  try{await api.setCfg("meta_poupanca",D.meta);setSync("ok")}
+  catch(e){setSync("off");toast("Erro ao salvar")}
+}
+
+document.querySelectorAll(".veil").forEach(function(v){
+  v.addEventListener("click",function(e){if(e.target===v)v.classList.remove("on")});
+});
+
+boot();
+</script>
+</body>
+</html>
