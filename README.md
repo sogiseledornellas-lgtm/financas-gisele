@@ -255,14 +255,15 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
       </div>
     </div>
     <div class="form-row">
-      <div class="field" style="margin-bottom:0"><label>Data</label><input type="date" id="f-date"/></div>
+      <div class="field" style="margin-bottom:0"><label>Data</label><input type="date" id="f-date" onchange="onCartaoChange()"/></div>
       <div class="field" style="margin-bottom:0"><label>Valor (R$)</label><input type="number" id="f-val" placeholder="0,00" min="0" step="0.01"/></div>
     </div>
     <div style="margin-top:12px" class="field"><label>Descrição</label><input type="text" id="f-desc" placeholder="Ex: Supermercado, Salário…"/></div>
     <div class="form-row">
       <div class="field" style="margin-bottom:0"><label>Categoria</label><select id="f-cat"></select></div>
-      <div class="field" style="margin-bottom:0" id="cartao-wrap"><label>Cartão / Forma</label><select id="f-cartao"></select></div>
+      <div class="field" style="margin-bottom:0" id="cartao-wrap"><label>Cartão / Forma</label><select id="f-cartao" onchange="onCartaoChange()"></select></div>
     </div>
+    <div class="field" id="fatura-wrap" style="display:none;margin-top:12px"><label>Fatura de qual mês? <span style="color:var(--text3);font-weight:400">(sugerido pela data de fechamento)</span></label><input type="month" id="f-fatura"/></div>
     <div style="margin-top:16px"><button class="btn btn-accent btn-full" id="btn-add" onclick="addTxn()">+ Adicionar lançamento</button></div>
   </div>
 </div>
@@ -301,13 +302,14 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
       </select></div>
       <div class="field"><label>Descrição</label><input type="text" id="p-desc" placeholder="Ex: Tesouro Selic, Apto Centro, Carro…"/></div>
       <div class="form-row">
-        <div class="field" style="margin-bottom:0"><label id="p-val-label">Valor total (R$)</label><input type="number" id="p-val" placeholder="0,00" min="0" step="0.01"/></div>
-        <div class="field" style="margin-bottom:0" id="p-parcela-wrap"><label>Parcela mensal (R$)</label><input type="number" id="p-parcela" placeholder="0,00" min="0" step="0.01"/></div>
+        <div class="field" style="margin-bottom:0"><label id="p-val-label">Valor do bem (R$)</label><input type="number" id="p-val" placeholder="0,00" min="0" step="0.01" oninput="calcPreview()"/></div>
+        <div class="field" style="margin-bottom:0" id="p-parcela-wrap"><label>Parcela mensal (R$)</label><input type="number" id="p-parcela" placeholder="0,00" min="0" step="0.01" oninput="calcPreview()"/></div>
       </div>
       <div class="form-row" id="p-parcelas-row">
-        <div class="field" style="margin-bottom:0"><label>Parcelas pagas</label><input type="number" id="p-pagas" placeholder="0" min="0" step="1"/></div>
-        <div class="field" style="margin-bottom:0"><label>Total de parcelas</label><input type="number" id="p-total-parc" placeholder="0" min="0" step="1"/></div>
+        <div class="field" style="margin-bottom:0"><label>Parcelas pagas</label><input type="number" id="p-pagas" placeholder="0" min="0" step="1" oninput="calcPreview()"/></div>
+        <div class="field" style="margin-bottom:0"><label>Total de parcelas</label><input type="number" id="p-total-parc" placeholder="0" min="0" step="1" oninput="calcPreview()"/></div>
       </div>
+      <div id="p-preview" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r10);padding:10px 12px;margin-top:12px;font-size:12px;line-height:1.7"></div>
       <div style="margin-top:14px;display:flex;gap:8px"><button class="btn btn-accent btn-full" id="p-save-btn" onclick="savePatr()">+ Adicionar ao patrimônio</button><button class="btn btn-ghost" id="p-cancel-btn" onclick="cancelEditPatr()" style="display:none">Cancelar</button></div>
     </div>
     <div>
@@ -409,9 +411,27 @@ html,body{height:100%;overflow:hidden;font-family:'Sora',sans-serif;background:v
       <div class="field" style="margin-bottom:0"><label>Categoria</label><select id="et-cat"></select></div>
       <div class="field" style="margin-bottom:0" id="et-cartao-wrap"><label>Cartão / Forma</label><select id="et-cartao"></select></div>
     </div>
+    <div class="field" id="et-fatura-wrap" style="display:none;margin-top:12px"><label>Fatura de qual mês?</label><input type="month" id="et-fatura"/></div>
     <div class="modal-actions" style="margin-top:18px">
       <button class="btn btn-ghost btn-sm" onclick="fecharTxnModal()">Cancelar</button>
       <button class="btn btn-accent btn-sm" onclick="salvarTxnEdit()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="antecipar-modal">
+  <div class="modal">
+    <div class="modal-title">⏩ Antecipar parcelas</div>
+    <input type="hidden" id="ant-id"/>
+    <div id="ant-info" style="font-size:13px;color:var(--text2);margin-bottom:14px"></div>
+    <div class="form-row">
+      <div class="field" style="margin-bottom:0"><label>Quantas antecipar</label><input type="number" id="ant-qtd" min="1" step="1" placeholder="Ex: 3" oninput="calcAntecipar()"/></div>
+      <div class="field" style="margin-bottom:0"><label>Desconto (%)</label><input type="number" id="ant-desc" min="0" max="100" step="0.1" placeholder="Ex: 5" oninput="calcAntecipar()"/></div>
+    </div>
+    <div id="ant-preview" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r10);padding:10px 12px;margin-top:14px;font-size:12px;line-height:1.7"></div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn btn-ghost btn-sm" onclick="fecharAnteciparModal()">Cancelar</button>
+      <button class="btn btn-accent btn-sm" onclick="confirmarAntecipar()">Confirmar</button>
     </div>
   </div>
 </div>
@@ -462,8 +482,10 @@ async function sbFetch(path, opts={}){
 const api = {
   async getTxns(){ return sbFetch("transacoes?order=data.desc") },
   async addTxn(d){ return sbFetch("transacoes", {method:"POST",body:JSON.stringify(d)}) },
+  async addTxnMany(arr){ return sbFetch("transacoes", {method:"POST",body:JSON.stringify(arr)}) },
   async updTxn(id,d){ return sbFetch("transacoes?id=eq."+id, {method:"PATCH",body:JSON.stringify(d)}) },
   async delTxn(id){ return sbFetch("transacoes?id=eq."+id, {method:"DELETE",prefer:""}) },
+  async delTxnByOrigem(pid){ return sbFetch("transacoes?origem_patrimonio_id=eq."+pid, {method:"DELETE",prefer:""}) },
   async getCartoes(){ return sbFetch("cartoes?order=criado_em.asc") },
   async addCartao(d){ return sbFetch("cartoes", {method:"POST",body:JSON.stringify(d)}) },
   async updCartao(id,d){ return sbFetch("cartoes?id=eq."+id, {method:"PATCH",body:JSON.stringify(d)}) },
@@ -522,11 +544,13 @@ function getCartao(id){
   if(id==="dinheiro")return{nome:"Dinheiro / Pix",cor:"#4ADE80"};
   return DB.cartoes.find(c=>c.id===id)||{nome:id,cor:"#888"}
 }
+function ymOf(t){
+  // usa competência (fatura) se existir; senão, o mês da data
+  if(t.competencia){const[y,m]=t.competencia.split("-");return{y:+y,m:+m-1}}
+  const d=new Date(t.data+"T12:00:00");return{y:d.getFullYear(),m:d.getMonth()}
+}
 function monthTxns(){
-  return DB.txns.filter(t=>{
-    const d=new Date(t.data+"T12:00:00");
-    return d.getFullYear()===cur.y&&d.getMonth()===cur.m;
-  })
+  return DB.txns.filter(t=>{const ym=ymOf(t);return ym.y===cur.y&&ym.m===cur.m})
 }
 function calcRes(txns){
   const rec=txns.filter(t=>t.tipo==="r").reduce((s,t)=>s+Number(t.valor),0);
@@ -534,7 +558,7 @@ function calcRes(txns){
   return{rec,desp,saldo:rec-desp}
 }
 function getYears(){
-  const ys=new Set(DB.txns.map(t=>new Date(t.data+"T12:00:00").getFullYear()));
+  const ys=new Set(DB.txns.map(t=>ymOf(t).y));
   ys.add(new Date().getFullYear());
   return[...ys].sort((a,b)=>b-a);
 }
@@ -638,6 +662,27 @@ function setTipo(t){
   document.getElementById("btn-d").className="type-btn"+(t==="d"?" on-d":"");
   document.getElementById("cartao-wrap").style.display=t==="d"?"":"none";
   fillSelects();
+  onCartaoChange();
+}
+// calcula a competência (AAAA-MM) sugerida a partir da data da compra + dia de fechamento do cartão
+function competenciaSugerida(dataStr,cartaoId){
+  const cart=getCartao(cartaoId);
+  const d=new Date((dataStr||new Date().toISOString().split("T")[0])+"T12:00:00");
+  let y=d.getFullYear(),m=d.getMonth();
+  const fech=cart&&cart.dia_fechamento?Number(cart.dia_fechamento):0;
+  // se comprou depois do fechamento, entra na fatura do mês seguinte
+  if(fech>0 && d.getDate()>fech){m++;if(m>11){m=0;y++}}
+  return y+"-"+String(m+1).padStart(2,"0");
+}
+function onCartaoChange(){
+  const wrap=document.getElementById("fatura-wrap");
+  const cartaoId=document.getElementById("f-cartao").value;
+  const isCartao=tipo==="d" && cartaoId && cartaoId!=="dinheiro";
+  wrap.style.display=isCartao?"":"none";
+  if(isCartao){
+    const data=document.getElementById("f-date").value;
+    document.getElementById("f-fatura").value=competenciaSugerida(data,cartaoId);
+  }
 }
 function fillSelects(){
   const cats=tipo==="r"?DB.catsR:DB.catsD;
@@ -650,6 +695,8 @@ async function addTxn(){
   const data=document.getElementById("f-date").value;
   const categoria_id=document.getElementById("f-cat").value;
   const cartao_id=tipo==="d"?document.getElementById("f-cartao").value:"dinheiro";
+  const isCartao=tipo==="d" && cartao_id!=="dinheiro";
+  const competencia=isCartao?(document.getElementById("f-fatura").value||null):null;
   if(!descricao){toast("⚠ Digite uma descrição");return}
   if(!valor||valor<=0){toast("⚠ Digite um valor válido");return}
   if(!data){toast("⚠ Escolha a data");return}
@@ -657,7 +704,7 @@ async function addTxn(){
   btn.disabled=true;btn.textContent="Salvando...";
   setSyncStatus("loading");
   try{
-    const [nova] = await api.addTxn({descricao,valor,data,tipo,categoria_id,cartao_id});
+    const [nova] = await api.addTxn({descricao,valor,data,tipo,categoria_id,cartao_id,competencia});
     DB.txns.unshift(nova);
     document.getElementById("f-desc").value="";document.getElementById("f-val").value="";
     setSyncStatus("ok");
@@ -685,6 +732,9 @@ function editTxn(id){
   document.getElementById("et-cat").innerHTML=cats.map(c=>`<option value="${c.id}"${c.id===t.categoria_id?" selected":""}>${c.icon} ${c.nome}</option>`).join("");
   document.getElementById("et-cartao-wrap").style.display=t.tipo==="d"?"":"none";
   document.getElementById("et-cartao").innerHTML=`<option value="dinheiro"${t.cartao_id==="dinheiro"?" selected":""}>💵 Dinheiro / Pix</option>`+DB.cartoes.map(c=>`<option value="${c.id}"${c.id===t.cartao_id?" selected":""}>${c.nome}</option>`).join("");
+  const temFatura=t.tipo==="d" && t.cartao_id && t.cartao_id!=="dinheiro";
+  document.getElementById("et-fatura-wrap").style.display=temFatura?"":"none";
+  document.getElementById("et-fatura").value=t.competencia||competenciaSugerida(t.data,t.cartao_id);
   document.getElementById("txn-modal").classList.add("open");
 }
 function fecharTxnModal(){document.getElementById("txn-modal").classList.remove("open")}
@@ -696,14 +746,16 @@ async function salvarTxnEdit(){
   const descricao=document.getElementById("et-desc").value.trim();
   const categoria_id=document.getElementById("et-cat").value;
   const cartao_id=tipo==="d"?document.getElementById("et-cartao").value:"dinheiro";
+  const temFatura=tipo==="d" && cartao_id!=="dinheiro";
+  const competencia=temFatura?(document.getElementById("et-fatura").value||null):null;
   if(!descricao){toast("⚠ Digite uma descrição");return}
   if(!valor||valor<=0){toast("⚠ Digite um valor válido");return}
   if(!data){toast("⚠ Escolha a data");return}
   setSyncStatus("loading");
   try{
-    const [upd]=await api.updTxn(id,{data,valor,descricao,categoria_id,cartao_id});
+    const [upd]=await api.updTxn(id,{data,valor,descricao,categoria_id,cartao_id,competencia});
     const idx=DB.txns.findIndex(t=>t.id===id);
-    if(idx>=0)DB.txns[idx]=upd||{...DB.txns[idx],data,valor,descricao,categoria_id,cartao_id};
+    if(idx>=0)DB.txns[idx]=upd||{...DB.txns[idx],data,valor,descricao,categoria_id,cartao_id,competencia};
     fecharTxnModal();
     setSyncStatus("ok");toast("✅ Lançamento atualizado!");render();
   }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
@@ -820,7 +872,29 @@ function onPatrTipo(){
   const parc=isParcelado(tipo);
   document.getElementById("p-parcela-wrap").style.display=parc?"":"none";
   document.getElementById("p-parcelas-row").style.display=parc?"":"none";
-  document.getElementById("p-val-label").textContent=parc?"Valor total da dívida (R$)":"Valor atual (R$)";
+  document.getElementById("p-val-label").textContent=parc?"Valor do bem (R$)":"Valor atual (R$)";
+  calcPreview();
+}
+// mostra prévia do cálculo enquanto digita
+function calcPreview(){
+  const tipo=document.getElementById("p-tipo").value;
+  const box=document.getElementById("p-preview");
+  if(!isParcelado(tipo)){box.style.display="none";return}
+  const bem=parseFloat(document.getElementById("p-val").value)||0;
+  const pm=parseFloat(document.getElementById("p-parcela").value)||0;
+  const tot=parseInt(document.getElementById("p-total-parc").value)||0;
+  const pagas=parseInt(document.getElementById("p-pagas").value)||0;
+  if(pm<=0||tot<=0){box.style.display="none";return}
+  const totalPagar=pm*tot;
+  const juros=totalPagar-bem;
+  const faltam=Math.max(0,tot-pagas);
+  const saldo=faltam*pm;
+  box.style.display="";
+  box.innerHTML=`
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">💰 Valor do bem</span><strong>${brl(bem)}</strong></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">💳 Total a pagar (${tot}×)</span><strong>${brl(totalPagar)}</strong></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">📈 Juros do financiamento</span><strong style="color:${juros>0?"var(--red)":"var(--green)"}">${brl(juros)}${bem>0?" ("+Math.round(juros/bem*100)+"%)":""}</strong></div>
+    <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;padding-top:4px"><span style="color:var(--text2)">📉 Saldo devedor (faltam ${faltam})</span><strong style="color:var(--amber)">${brl(saldo)}</strong></div>`;
 }
 // soma das parcelas mensais ainda a pagar (dívidas ativas)
 function parcelasMensais(){
@@ -834,10 +908,11 @@ let editPatrId=null; // null = adicionando; id = editando
 function patrFormData(){
   const tipo=document.getElementById("p-tipo").value;
   const descricao=document.getElementById("p-desc").value.trim();
-  const valor=parseFloat(document.getElementById("p-val").value)||0;
+  const valor=parseFloat(document.getElementById("p-val").value)||0; // p/ parcelados = valor do bem
   const parc=isParcelado(tipo);
   return {
     tipo,descricao,valor,
+    valor_bem:parc?valor:null,
     parcela_mensal:parc?(parseFloat(document.getElementById("p-parcela").value)||0):0,
     parcelas_pagas:parc?(parseInt(document.getElementById("p-pagas").value)||0):0,
     parcelas_total:parc?(parseInt(document.getElementById("p-total-parc").value)||0):0
@@ -846,6 +921,36 @@ function patrFormData(){
 function clearPatrForm(){
   document.getElementById("p-desc").value="";document.getElementById("p-val").value="";
   document.getElementById("p-parcela").value="";document.getElementById("p-pagas").value="";document.getElementById("p-total-parc").value="";
+  document.getElementById("p-preview").style.display="none";
+}
+// gera as parcelas futuras de um financiamento/parcelamento como despesas reais (com competência)
+async function gerarParcelas(patrItem){
+  const pm=Number(patrItem.parcela_mensal||0);
+  const tot=Number(patrItem.parcelas_total||0);
+  const pagas=Number(patrItem.parcelas_pagas||0);
+  if(pm<=0||tot<=0)return;
+  // categoria "Financeiro" pra agrupar
+  const catFin=DB.catsD.find(c=>c.nome==="Financeiro")||DB.catsD[0];
+  // a próxima parcela a vencer começa no mês atual
+  const hoje=new Date();
+  let y=hoje.getFullYear(),m=hoje.getMonth();
+  const faltam=Math.max(0,tot-pagas);
+  const novas=[];
+  for(let i=0;i<faltam;i++){
+    const comp=y+"-"+String(m+1).padStart(2,"0");
+    const dataStr=comp+"-05"; // dia 5 como referência
+    novas.push({
+      descricao:patrItem.descricao+" ("+(pagas+i+1)+"/"+tot+")",
+      valor:pm, data:dataStr, tipo:"d",
+      categoria_id:catFin.id, cartao_id:"dinheiro",
+      competencia:comp, origem_patrimonio_id:patrItem.id
+    });
+    m++;if(m>11){m=0;y++}
+  }
+  if(novas.length){
+    const criadas=await api.addTxnMany(novas);
+    (criadas||[]).forEach(t=>DB.txns.unshift(t));
+  }
 }
 async function savePatr(){
   const d=patrFormData();
@@ -855,17 +960,27 @@ async function savePatr(){
   try{
     if(editPatrId){
       const [upd]=await api.updPatr(editPatrId,d);
+      const item=upd||{...DB.patr.find(p=>p.id===editPatrId),...d,id:editPatrId};
       const idx=DB.patr.findIndex(p=>p.id===editPatrId);
-      if(idx>=0)DB.patr[idx]=upd||{...DB.patr[idx],...d};
+      if(idx>=0)DB.patr[idx]=item;
+      // regenera as parcelas: apaga as antigas e recria com os novos valores
+      if(isParcelado(item.tipo)){
+        try{await api.delTxnByOrigem(item.id);DB.txns=DB.txns.filter(t=>t.origem_patrimonio_id!==item.id)}catch(e){}
+        await gerarParcelas(item);
+      }
       cancelEditPatr();
       setSyncStatus("ok");toast("✅ "+PATR_TIPOS[d.tipo].label+" atualizado!");render();
     } else {
       const [novo]=await api.addPatr(d);
       DB.patr.push(novo);
+      // se for parcelado, gera as parcelas automáticas
+      if(isParcelado(novo.tipo))await gerarParcelas(novo);
       clearPatrForm();
-      setSyncStatus("ok");toast("✅ "+PATR_TIPOS[d.tipo].label+" adicionado!");render();
+      setSyncStatus("ok");
+      toast(isParcelado(novo.tipo)?"✅ "+PATR_TIPOS[d.tipo].label+" adicionado! Parcelas lançadas nos próximos meses.":"✅ "+PATR_TIPOS[d.tipo].label+" adicionado!",4000);
+      render();
     }
-  }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message+" — rodou o SQL da tabela patrimonio?",5000)}
+  }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message+" — rodou os SQLs novos?",5000)}
 }
 function editPatr(id){
   const p=DB.patr.find(x=>x.id===id);if(!p)return;
@@ -877,6 +992,7 @@ function editPatr(id){
   document.getElementById("p-pagas").value=p.parcelas_pagas||"";
   document.getElementById("p-total-parc").value=p.parcelas_total||"";
   onPatrTipo();
+  calcPreview();
   document.getElementById("p-form-title").textContent="✏️ Editando: "+p.descricao;
   document.getElementById("p-save-btn").textContent="Salvar alterações";
   document.getElementById("p-cancel-btn").style.display="";
@@ -890,8 +1006,13 @@ function cancelEditPatr(){
   document.getElementById("p-cancel-btn").style.display="none";
 }
 async function delPatr(id){
+  const item=DB.patr.find(p=>p.id===id);
+  if(item&&isParcelado(item.tipo)){
+    if(!confirm("Isso vai remover também as parcelas lançadas nos próximos meses. Continuar?"))return;
+  }
   setSyncStatus("loading");
   try{
+    try{await api.delTxnByOrigem(id);DB.txns=DB.txns.filter(t=>t.origem_patrimonio_id!==id)}catch(e){}
     await api.delPatr(id);
     DB.patr=DB.patr.filter(p=>p.id!==id);
     if(editPatrId===id)cancelEditPatr();
@@ -899,26 +1020,101 @@ async function delPatr(id){
   }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
 }
 function renderPatr(){
-  const ativos=DB.patr.filter(p=>PATR_TIPOS[p.tipo]&&PATR_TIPOS[p.tipo].ativo);
+  const ativosPuros=DB.patr.filter(p=>PATR_TIPOS[p.tipo]&&PATR_TIPOS[p.tipo].ativo);
   const dividas=DB.patr.filter(p=>p.tipo&&isParcelado(p.tipo));
-  const totalAtivos=ativos.reduce((s,p)=>s+Number(p.valor),0);
-  // saldo devedor = parcelas que faltam × parcela mensal (ou valor total se sem parcelas)
+  // valor dos bens puros + valor dos bens financiados (o carro/imóvel que você tem)
+  const totalAtivos=ativosPuros.reduce((s,p)=>s+Number(p.valor),0)
+    + dividas.reduce((s,p)=>s+Number(p.valor_bem||0),0);
+  // saldo devedor = parcelas que faltam × parcela mensal
   const totalDividas=dividas.reduce((s,p)=>{
     const pagas=Number(p.parcelas_pagas||0),tot=Number(p.parcelas_total||0),pm=Number(p.parcela_mensal||0);
     if(tot>0){const faltam=Math.max(0,tot-pagas);return s+faltam*pm}
     return s+Number(p.valor)
+  },0);
+  // total de juros de todos os financiamentos
+  const totalJuros=dividas.reduce((s,p)=>{
+    const pm=Number(p.parcela_mensal||0),tot=Number(p.parcelas_total||0),bem=Number(p.valor_bem||0);
+    if(pm>0&&tot>0&&bem>0)return s+Math.max(0,(pm*tot)-bem);
+    return s;
   },0);
   const liquido=totalAtivos-totalDividas;
   const mensal=parcelasMensais();
   document.getElementById("patr-metrics").innerHTML=`
     <div class="metric"><div class="metric-label">Ativos</div><div class="metric-val" style="color:var(--green)">${brl(totalAtivos)}</div><div class="metric-sub">o que eu tenho</div></div>
     <div class="metric"><div class="metric-label">Dívidas</div><div class="metric-val" style="color:var(--red)">${brl(totalDividas)}</div><div class="metric-sub">saldo devedor</div></div>
-    <div class="metric"><div class="metric-label">Patrimônio líquido</div><div class="metric-val" style="color:${liquido>=0?"var(--green)":"var(--red)"}">${brl(liquido)}</div><div class="metric-sub">ativos − dívidas</div></div>
-    <div class="metric"><div class="metric-label">Parcelas/mês</div><div class="metric-val" style="color:var(--amber)">${brl(mensal)}</div><div class="metric-sub">compromisso fixo</div></div>`;
+    <div class="metric"><div class="metric-label">Juros totais</div><div class="metric-val" style="color:var(--amber)">${brl(totalJuros)}</div><div class="metric-sub">custo do crédito</div></div>
+    <div class="metric"><div class="metric-label">Patrimônio líquido</div><div class="metric-val" style="color:${liquido>=0?"var(--green)":"var(--red)"}">${brl(liquido)}</div><div class="metric-sub">ativos − dívidas</div></div>`;
   const rowAtivo=p=>{const t=PATR_TIPOS[p.tipo];return`<div class="list-row"><div style="font-size:22px;flex-shrink:0">${t.icon}</div><div class="row-body"><div class="row-name">${p.descricao}</div><div class="row-meta">${t.label}</div></div><div class="row-val" style="color:var(--green)">${brl(p.valor)}</div><button class="row-edit" onclick="editPatr('${p.id}')" title="Editar">✏️</button><button class="row-del" onclick="delPatr('${p.id}')">×</button></div>`};
-  const rowDivida=p=>{const t=PATR_TIPOS[p.tipo];const pagas=Number(p.parcelas_pagas||0),tot=Number(p.parcelas_total||0),pm=Number(p.parcela_mensal||0);const faltam=tot>0?Math.max(0,tot-pagas):0;const quitado=tot>0&&pagas>=tot;const saldo=tot>0?faltam*pm:Number(p.valor);const prog=tot>0?Math.round(pagas/tot*100):0;return`<div class="list-row"><div style="font-size:22px;flex-shrink:0">${t.icon}</div><div class="row-body"><div class="row-name">${p.descricao}${quitado?` <span class="badge badge-green" style="font-size:9px">quitado</span>`:""}</div><div class="row-meta">${t.label}${tot>0?` · ${pagas}/${tot} parcelas de ${brl(pm)}`:""}</div>${tot>0?`<div class="prog-wrap" style="height:4px"><div class="prog-fill" style="width:${prog}%;background:${quitado?"var(--green)":"var(--amber)"}"></div></div>`:""}</div><div class="row-val" style="color:${quitado?"var(--text3)":"var(--red)"}">${brl(saldo)}</div><button class="row-edit" onclick="editPatr('${p.id}')" title="Editar">✏️</button><button class="row-del" onclick="delPatr('${p.id}')">×</button></div>`};
-  document.getElementById("patr-ativos").innerHTML=ativos.length?ativos.map(rowAtivo).join(""):`<div class="empty"><div class="empty-icon">💰</div>Nenhum ativo cadastrado</div>`;
+  // linha de bem financiado (aparece nos ativos)
+  const rowBemFin=p=>{const t=PATR_TIPOS[p.tipo];return`<div class="list-row"><div style="font-size:22px;flex-shrink:0">${t.icon}</div><div class="row-body"><div class="row-name">${p.descricao}</div><div class="row-meta">${t.label} (financiado)</div></div><div class="row-val" style="color:var(--green)">${brl(p.valor_bem||0)}</div></div>`};
+  const rowDivida=p=>{
+    const t=PATR_TIPOS[p.tipo];
+    const pagas=Number(p.parcelas_pagas||0),tot=Number(p.parcelas_total||0),pm=Number(p.parcela_mensal||0),bem=Number(p.valor_bem||0);
+    const faltam=tot>0?Math.max(0,tot-pagas):0;
+    const quitado=tot>0&&pagas>=tot;
+    const saldo=tot>0?faltam*pm:Number(p.valor);
+    const juros=(pm>0&&tot>0&&bem>0)?Math.max(0,(pm*tot)-bem):0;
+    const prog=tot>0?Math.round(pagas/tot*100):0;
+    const detalhe=bem>0?`<div style="font-size:10px;color:var(--text3);margin-top:2px">Bem: ${brl(bem)} · Total: ${brl(pm*tot)} · Juros: <span style="color:var(--amber)">${brl(juros)}</span></div>`:"";
+    return`<div class="list-row"><div style="font-size:22px;flex-shrink:0">${t.icon}</div><div class="row-body"><div class="row-name">${p.descricao}${quitado?` <span class="badge badge-green" style="font-size:9px">quitado</span>`:""}</div><div class="row-meta">${t.label}${tot>0?` · ${pagas}/${tot} parcelas de ${brl(pm)}`:""}</div>${detalhe}${tot>0?`<div class="prog-wrap" style="height:4px;margin-top:3px"><div class="prog-fill" style="width:${prog}%;background:${quitado?"var(--green)":"var(--amber)"}"></div></div>`:""}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="row-val" style="color:${quitado?"var(--text3)":"var(--red)"}">${brl(saldo)}</div>${!quitado&&tot>0?`<button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px" onclick="abrirAntecipar('${p.id}')">⏩ Antecipar</button>`:""}</div><button class="row-edit" onclick="editPatr('${p.id}')" title="Editar">✏️</button><button class="row-del" onclick="delPatr('${p.id}')">×</button></div>`;
+  };
+  const ativosHtml=ativosPuros.map(rowAtivo).join("")+dividas.filter(p=>Number(p.valor_bem||0)>0).map(rowBemFin).join("");
+  document.getElementById("patr-ativos").innerHTML=ativosHtml||`<div class="empty"><div class="empty-icon">💰</div>Nenhum ativo cadastrado</div>`;
   document.getElementById("patr-dividas").innerHTML=dividas.length?dividas.map(rowDivida).join(""):`<div class="empty"><div class="empty-icon">📉</div>Nenhuma dívida cadastrada</div>`;
+}
+// ── Antecipação de parcelas ──
+function abrirAntecipar(id){
+  const p=DB.patr.find(x=>x.id===id);if(!p)return;
+  document.getElementById("ant-id").value=id;
+  const pagas=Number(p.parcelas_pagas||0),tot=Number(p.parcelas_total||0),pm=Number(p.parcela_mensal||0);
+  const faltam=Math.max(0,tot-pagas);
+  document.getElementById("ant-info").innerHTML=`<strong>${p.descricao}</strong><br>Faltam <strong>${faltam}</strong> parcelas de ${brl(pm)}`;
+  document.getElementById("ant-qtd").value="";
+  document.getElementById("ant-desc").value="";
+  document.getElementById("ant-preview").innerHTML="Preencha os campos acima para ver o resultado.";
+  document.getElementById("antecipar-modal").classList.add("open");
+}
+function fecharAnteciparModal(){document.getElementById("antecipar-modal").classList.remove("open")}
+function calcAntecipar(){
+  const id=document.getElementById("ant-id").value;
+  const p=DB.patr.find(x=>x.id===id);if(!p)return;
+  const pm=Number(p.parcela_mensal||0);
+  const qtd=parseInt(document.getElementById("ant-qtd").value)||0;
+  const desc=parseFloat(document.getElementById("ant-desc").value)||0;
+  if(qtd<=0){document.getElementById("ant-preview").innerHTML="Informe quantas parcelas antecipar.";return}
+  const bruto=qtd*pm;
+  const descontoRS=bruto*(desc/100);
+  const pagar=bruto-descontoRS;
+  document.getElementById("ant-preview").innerHTML=`
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">${qtd} parcelas de ${brl(pm)}</span><strong>${brl(bruto)}</strong></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Desconto (${desc}%)</span><strong style="color:var(--green)">− ${brl(descontoRS)}</strong></div>
+    <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;padding-top:4px"><span style="color:var(--text2)">Você paga</span><strong>${brl(pagar)}</strong></div>`;
+}
+async function confirmarAntecipar(){
+  const id=document.getElementById("ant-id").value;
+  const p=DB.patr.find(x=>x.id===id);if(!p)return;
+  const pm=Number(p.parcela_mensal||0),pagas=Number(p.parcelas_pagas||0),tot=Number(p.parcelas_total||0);
+  const qtd=parseInt(document.getElementById("ant-qtd").value)||0;
+  const desc=parseFloat(document.getElementById("ant-desc").value)||0;
+  const faltam=Math.max(0,tot-pagas);
+  if(qtd<=0){toast("⚠ Informe quantas parcelas");return}
+  if(qtd>faltam){toast("⚠ Você só tem "+faltam+" parcelas a pagar");return}
+  const descontoRS=qtd*pm*(desc/100);
+  setSyncStatus("loading");
+  try{
+    // atualiza parcelas pagas no patrimônio
+    const novasPagas=pagas+qtd;
+    const [upd]=await api.updPatr(id,{parcelas_pagas:novasPagas});
+    const idx=DB.patr.findIndex(x=>x.id===id);
+    if(idx>=0)DB.patr[idx]=upd||{...DB.patr[idx],parcelas_pagas:novasPagas};
+    // regenera as despesas futuras (agora com menos parcelas)
+    try{await api.delTxnByOrigem(id);DB.txns=DB.txns.filter(t=>t.origem_patrimonio_id!==id)}catch(e){}
+    await gerarParcelas(DB.patr[idx]);
+    fecharAnteciparModal();
+    setSyncStatus("ok");
+    toast(`✅ ${qtd} parcelas antecipadas! Economia de ${brl(descontoRS)}`,4000);
+    render();
+  }catch(e){setSyncStatus("error");toast("⚠ Erro: "+e.message)}
 }
 function imprimirRelatorio(){window.print()}
 
@@ -948,9 +1144,10 @@ function renderDash(txns,rec,desp,saldo){
   const despTxns=txns.filter(t=>t.tipo==="d");
   const totalOrc=DB.orcs.reduce((s,o)=>s+Number(o.valor),0);
   const poupPct=DB.metaPoupanca||20;
-  const parcMensal=parcelasMensais();
+  // parcelas de financiamento que caem NESTE mês (já são despesas reais via competência)
+  const parcMensal=txns.filter(t=>t.origem_patrimonio_id).reduce((s,t)=>s+Number(t.valor),0);
   let eqHtml="";
-  // Compromisso total a pagar = orçamento de gastos + parcelas/financiamentos do mês
+  // Compromisso = orçamento de gastos + parcelas de financiamento do mês
   const compromisso=totalOrc+parcMensal;
   if(compromisso>0){
     // ponto de equilíbrio: precisa cobrir compromisso E ainda guardar a poupança
