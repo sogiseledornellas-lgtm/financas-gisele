@@ -235,6 +235,12 @@ body{overflow:hidden}
         <div class="fld" id="a-fat-wrap" style="display:none"><label>Entra na fatura de</label>
           <input type="month" id="a-fat"/></div>
       </div>
+      <div class="fld"><label>Situação</label>
+        <div class="seg" style="margin-bottom:0">
+          <button id="st-1" onclick="setPaid(true)">Já paguei</button>
+          <button id="st-0" onclick="setPaid(false)">Ainda vou pagar</button>
+        </div>
+      </div>
       <button class="btn btn-go" id="a-go" onclick="saveEntry()">Salvar lançamento</button>
       <div class="card" style="margin-top:18px">
         <div class="card-t">Contas fixas do mês
@@ -246,6 +252,7 @@ body{overflow:hidden}
     <section class="screen" id="s-month">
       <h1 class="h1" id="m-title">O mês</h1>
       <div id="m-tide"></div>
+      <div class="card" id="m-due-card"><div class="card-t">Ainda a pagar</div><div id="m-due"></div></div>
       <div class="grid2">
         <div>
           <div class="card"><div class="card-t">Equilíbrio</div><div id="m-eq"></div></div>
@@ -261,6 +268,7 @@ body{overflow:hidden}
     <section class="screen" id="s-list">
       <h1 class="h1">Extrato</h1>
       <div class="chips" id="l-filters"></div>
+      <div id="l-summary"></div>
       <div class="card">
         <div class="card-t"><span id="l-count"></span>
           <button class="btn btn-ghost btn-sm no-print" onclick="window.print()">Imprimir</button></div>
@@ -370,6 +378,11 @@ body{overflow:hidden}
     <div class="fld"><label>Como pagou</label><select id="e-pay"></select></div>
   </div>
   <div class="fld" id="e-fat-wrap" style="display:none"><label>Entra na fatura de</label><input type="month" id="e-fat"/></div>
+  <div class="row2">
+    <div class="fld"><label>Situação</label><select id="e-pago" onchange="toggleEPay()">
+      <option value="1">Pago</option><option value="0">A pagar</option></select></div>
+    <div class="fld" id="e-pagoem-wrap"><label>Pago em</label><input type="date" id="e-pagoem"/></div>
+  </div>
   <div class="sheet-act">
     <button class="btn btn-ghost" onclick="closeV('v-txn')">Cancelar</button>
     <button class="btn btn-go" onclick="saveTxnEdit()">Salvar</button>
@@ -423,6 +436,17 @@ body{overflow:hidden}
   </div>
   <button class="btn btn-go" onclick="addFix()">Adicionar conta fixa</button>
   <div class="sheet-act"><button class="btn btn-ghost" onclick="closeV('v-fix')">Fechar</button></div>
+</div></div>
+
+<div class="veil" id="v-pay"><div class="sheet">
+  <div class="sheet-t">Registrar pagamento</div>
+  <input type="hidden" id="pay-id"/>
+  <div class="note" id="pay-info" style="margin-bottom:14px"></div>
+  <div class="fld"><label>Paguei no dia</label><input type="date" id="pay-date"/></div>
+  <div class="sheet-act">
+    <button class="btn btn-ghost" onclick="closeV('v-pay')">Cancelar</button>
+    <button class="btn btn-go" onclick="confirmPay()">Confirmar pagamento</button>
+  </div>
 </div></div>
 
 <div class="veil" id="v-ant"><div class="sheet">
@@ -491,7 +515,14 @@ const MES=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto
 const D={txns:[],cards:[],catD:[],catR:[],orcs:[],pat:[],fix:[],meta:20};
 const now=new Date();
 let cur={y:now.getFullYear(),m:now.getMonth()};
-let view="add", kind="d", pickedCat=null, pickedPay="dinheiro", editPat=null, filter="all";
+let view="add", kind="d", pickedCat=null, pickedPay="dinheiro", editPat=null, filter="all", paid=true;
+
+/* pago x previsto — lançamentos antigos (sem a coluna) contam como pagos */
+function isPaid(t){return t.pago!==false}
+function hoje(){return new Date().toISOString().slice(0,10)}
+function isLate(t){return !isPaid(t)&&String(t.data)<hoje()}
+function paidOf(a){return a.filter(isPaid)}
+function dueOf(a){return a.filter(function(t){return !isPaid(t)})}
 
 /* ═══ utilitários ═══ */
 function brl(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -593,7 +624,14 @@ function setKind(k){
   document.getElementById("tg-r").className=k==="r"?"on-r":"";
   document.getElementById("a-pay-wrap").style.display=k==="d"?"":"none";
   pickedCat=null;
-  drawAdd(); refreshFatura();
+  drawAdd(); refreshFatura(); setPaid(paid);
+}
+function setPaid(v){
+  paid=v;
+  document.getElementById("st-1").className=v?(kind==="r"?"on-r":"on-d"):"";
+  document.getElementById("st-0").className=v?"":"on-d";
+  document.getElementById("st-1").textContent=kind==="r"?"Já recebi":"Já paguei";
+  document.getElementById("st-0").textContent=kind==="r"?"Ainda vou receber":"Ainda vou pagar";
 }
 function drawAdd(){
   const cats=kind==="d"?D.catD:D.catR;
@@ -662,7 +700,8 @@ async function saveEntry(){
   const isCard=kind==="d"&&pickedPay!=="dinheiro";
   const novo={descricao:descricao,valor:valor,data:data,tipo:kind,categoria_id:pickedCat,
     cartao_id:kind==="d"?pickedPay:"dinheiro",
-    competencia:isCard?(document.getElementById("a-fat").value||null):null};
+    competencia:isCard?(document.getElementById("a-fat").value||null):null,
+    pago:paid, data_pagamento:paid?data:null};
   const btn=document.getElementById("a-go");
   btn.disabled=true;btn.textContent="Salvando…";setSync("busy");
   try{
@@ -671,7 +710,8 @@ async function saveEntry(){
     document.getElementById("a-val").value="";
     document.getElementById("a-desc").value="";
     setSync("ok");
-    toast(kind==="r"?"Receita salva":"Despesa salva");
+    toast(paid?(kind==="r"?"Receita registrada":"Despesa registrada")
+              :(kind==="r"?"Receita prevista":"Conta a pagar registrada"));
     draw();
   }catch(e){setSync("off");toast("Não salvou: "+String(e.message).slice(0,60),4200)}
   btn.disabled=false;btn.textContent="Salvar lançamento";
@@ -709,8 +749,8 @@ async function launchFix(i){
   try{
     const r=await api.addTxn({descricao:f.desc,valor:f.val,data:data,tipo:f.kind,
       categoria_id:f.cat,cartao_id:f.kind==="d"?(f.pay||"dinheiro"):"dinheiro",
-      competencia:isCard?ymNow():null});
-    D.txns.unshift(r[0]); setSync("ok"); toast(f.desc+" lançada"); draw();
+      competencia:isCard?ymNow():null, pago:false, data_pagamento:null});
+    D.txns.unshift(r[0]); setSync("ok"); toast(f.desc+" prevista para este mês"); draw();
   }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
 }
 async function launchAllFix(){
@@ -760,35 +800,71 @@ async function delFix(i){D.fix.splice(i,1);await persistFix();drawFixManage();dr
 
 /* ═══ O MÊS ═══ */
 function drawMonth(){
-  const t=monthOf(cur.y,cur.m), r=rec(t), d=des(t), s=r-d;
+  const t=monthOf(cur.y,cur.m);
+  const pagos=paidOf(t), aPagar=dueOf(t);
+  const r=rec(pagos), d=des(pagos), s=r-d;            // realizado: o que já saiu/entrou
+  const dPrev=des(aPagar), rPrev=rec(aPagar);          // ainda não pago/recebido
+  const atras=des(aPagar.filter(isLate));              // vencido e não pago
+  const projecao=(r+rPrev)-(d+dPrev);                  // como o mês deve fechar
   document.getElementById("m-title").textContent=MES[cur.m]+" de "+cur.y;
   const pct=r>0?Math.min(100,Math.round(d/r*100)):(d>0?100:0);
   document.getElementById("m-tide").innerHTML=
     '<div class="tide '+(s>=0?"pos":"neg")+'">'+
-    '<div class="tide-lbl">'+(s>=0?"sobrou este mês":"faltou este mês")+'</div>'+
+    '<div class="tide-lbl">'+(s>=0?"sobrou até agora":"faltou até agora")+'</div>'+
     '<div class="tide-val num" style="color:'+(s>=0?"var(--up)":"var(--down)")+'">'+brl(Math.abs(s))+'</div>'+
-    '<div class="tide-sub">'+brl(r)+' entraram · '+brl(d)+' saíram</div>'+
+    '<div class="tide-sub">'+brl(r)+' entraram · '+brl(d)+' saíram de fato</div>'+
     '<div class="gauge"><div class="gauge-bar"><div class="gauge-fill" style="width:'+pct+'%;background:'+
       (pct<70?"var(--up)":pct<100?"var(--gold)":"var(--down)")+'"></div></div>'+
-    '<div class="gauge-legend"><span>'+pct+'% da renda comprometida</span><span>'+t.length+' lançamentos</span></div>'+
-    '</div></div>';
+    '<div class="gauge-legend"><span>'+pct+'% da renda já comprometida</span><span>'+t.length+' lançamentos</span></div>'+
+    '</div>'+
+    ((dPrev>0||rPrev>0)?'<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:12.5px;color:var(--paper2)">'+
+      '<div class="l" style="display:flex;justify-content:space-between"><span>Ainda a pagar</span>'+
+        '<b style="color:var(--gold)">'+brl(dPrev)+'</b></div>'+
+      (rPrev>0?'<div class="l" style="display:flex;justify-content:space-between"><span>Ainda a receber</span>'+
+        '<b style="color:var(--up)">'+brl(rPrev)+'</b></div>':'')+
+      (atras>0?'<div class="l" style="display:flex;justify-content:space-between"><span>Vencido e não pago</span>'+
+        '<b style="color:var(--down)">'+brl(atras)+'</b></div>':'')+
+      '<div class="l" style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
+        '<span>O mês deve fechar em</span><b class="num" style="color:'+(projecao>=0?"var(--up)":"var(--down)")+'">'+
+        (projecao>=0?"+":"−")+brl(Math.abs(projecao))+'</b></div>'+
+      '</div>':'')+
+    '</div>';
+
+  // lista do que ainda falta pagar
+  const dueCard=document.getElementById("m-due-card");
+  const due=aPagar.slice().sort(function(a,b){return String(a.data).localeCompare(String(b.data))});
+  if(!due.length){dueCard.style.display="none"}
+  else{
+    dueCard.style.display="";
+    document.getElementById("m-due").innerHTML=due.map(function(x){
+      const c=cat(x.categoria_id), late=isLate(x);
+      const dd=new Date(x.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
+      return '<div class="row"><div class="row-ic">'+esc(c.icon)+'</div>'+
+        '<div class="row-mid"><div class="row-nm">'+esc(x.descricao)+
+        (late?' <span class="tag tag-down">atrasada</span>':'')+'</div>'+
+        '<div class="row-sub">vence '+dd+' · '+esc(c.nome)+'</div></div>'+
+        '<div class="row-val" style="color:'+(late?"var(--down)":"var(--gold)")+'">'+brl(x.valor)+'</div>'+
+        '<button class="btn btn-go btn-sm" style="width:auto" onclick="openPay(\''+x.id+'\')">'+
+        (x.tipo==="r"?"Recebi":"Paguei")+'</button></div>'}).join("");
+  }
 
   const totalOrc=D.orcs.reduce(function(a,o){return a+Number(o.valor)},0);
   const parc=sum(t.filter(function(x){return x.origem_patrimonio_id}));
   const need=totalOrc+parc, meta=D.meta||0;
   const eq=need>0?need/(1-meta/100):0;
   const box=document.getElementById("m-eq");
+  const rTot=r+rPrev; // renda do mês (recebida + a receber)
   if(eq>0){
-    const falta=Math.max(0,eq-r), sobra=r-eq;
+    const falta=Math.max(0,eq-rTot), sobra=rTot-eq;
     box.innerHTML='<div class="note">'+
       '<div class="l"><span>Contas previstas</span><b>'+brl(totalOrc)+'</b></div>'+
       '<div class="l"><span>Parcelas de financiamento</span><b>'+brl(parc)+'</b></div>'+
       '<div class="l"><span>Guardar '+meta+'%</span><b>'+brl(eq-need)+'</b></div>'+
       '<div class="l" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
         '<span>Preciso ganhar</span><b class="num">'+brl(eq)+'</b></div>'+
-      '<div class="l"><span>Ganhei</span><b class="num" style="color:'+(r>=eq?"var(--up)":"var(--down)")+'">'+brl(r)+'</b></div>'+
+      '<div class="l"><span>Renda do mês</span><b class="num" style="color:'+(rTot>=eq?"var(--up)":"var(--down)")+'">'+brl(rTot)+'</b></div>'+
       '</div><div style="margin-top:10px;text-align:center">'+
-      (r>=eq?'<span class="tag tag-up">no azul · sobra '+brl(sobra)+'</span>'
+      (rTot>=eq?'<span class="tag tag-up">no azul · sobra '+brl(sobra)+'</span>'
             :'<span class="tag tag-down">faltam '+brl(falta)+' para o equilíbrio</span>')+'</div>';
   }else{
     box.innerHTML='<div class="empty"><span class="e">&#9675;</span>Defina limites por categoria em Ajustes para ver quanto precisa ganhar.</div>';
@@ -844,21 +920,90 @@ function drawList(){
   else if(filter==="d")list=t.filter(function(x){return x.tipo==="d"});
   else if(filter!=="all")list=t.filter(function(x){return (x.cartao_id||"dinheiro")===filter});
   list=list.slice().sort(function(a,b){return String(b.data).localeCompare(String(a.data))});
+
+  /* ── totais do que está filtrado ── */
+  const ent=rec(list), sai=des(list);
+  const saiPago=des(paidOf(list)), saiDue=des(dueOf(list));
+  const atrasado=des(dueOf(list).filter(isLate));
+  const nomeFiltro=filter==="all"?"Tudo":filter==="r"?"Entradas":filter==="d"?"Saídas":card(filter).nome;
+  // quebra por categoria dentro do filtro
+  const porCat={};
+  list.filter(function(x){return x.tipo==="d"}).forEach(function(x){
+    porCat[x.categoria_id]=(porCat[x.categoria_id]||0)+Number(x.valor)});
+  const catList=Object.keys(porCat).map(function(k){return[k,porCat[k]]})
+    .sort(function(a,b){return b[1]-a[1]});
+  document.getElementById("l-summary").innerHTML=list.length?
+    '<div class="card"><div class="card-t">'+esc(nomeFiltro)+' · '+MES[cur.m]+" "+cur.y+'</div>'+
+    '<div class="note">'+
+      (ent>0?'<div class="l"><span>Entradas</span><b style="color:var(--up)">'+brl(ent)+'</b></div>':'')+
+      (sai>0?'<div class="l"><span>Saídas (total)</span><b style="color:var(--down)">'+brl(sai)+'</b></div>':'')+
+      (saiDue>0?'<div class="l"><span>&nbsp;&nbsp;já pago</span><b>'+brl(saiPago)+'</b></div>'+
+                '<div class="l"><span>&nbsp;&nbsp;ainda a pagar</span><b style="color:var(--gold)">'+brl(saiDue)+'</b></div>':'')+
+      (atrasado>0?'<div class="l"><span>&nbsp;&nbsp;atrasado</span><b style="color:var(--down)">'+brl(atrasado)+'</b></div>':'')+
+      ((ent>0&&sai>0)?'<div class="l" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
+        '<span>Diferença</span><b class="num" style="color:'+(ent-sai>=0?"var(--up)":"var(--down)")+'">'+
+        brl(Math.abs(ent-sai))+'</b></div>':'')+
+    '</div>'+
+    (catList.length>1?'<div style="margin-top:12px">'+catList.map(function(x){
+      const c=cat(x[0]), p=sai>0?Math.round(x[1]/sai*100):0;
+      return '<div class="row" style="padding:8px 0"><div class="row-ic" style="width:28px;height:28px;font-size:14px">'+esc(c.icon)+'</div>'+
+        '<div class="row-mid"><div class="row-nm" style="font-size:13px">'+esc(c.nome)+'</div>'+
+        '<div class="bar"><i style="width:'+p+'%;background:var(--gold)"></i></div></div>'+
+        '<div class="row-val" style="font-size:13px">'+brl(x[1])+'</div></div>'}).join("")+'</div>':'')+
+    '</div>':"";
+
   document.getElementById("l-count").textContent=
-    MES[cur.m]+" "+cur.y+" — "+list.length+" lançamento"+(list.length===1?"":"s");
+    list.length+" lançamento"+(list.length===1?"":"s");
   document.getElementById("l-rows").innerHTML=list.length?list.map(function(x){
     const c=cat(x.categoria_id), pay=x.tipo==="d"?card(x.cartao_id):null;
     const d=new Date(x.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
     const fat=x.competencia?" · fatura "+String(x.competencia).split("-").reverse().join("/"):"";
-    return '<div class="row"><div class="row-ic">'+esc(c.icon)+'</div>'+
+    const pago=isPaid(x), late=isLate(x);
+    const selo=pago?'':(late?' <span class="tag tag-down">atrasada</span>'
+                             :' <span class="tag tag-gold">a pagar</span>');
+    const quandoPagou=(pago&&x.data_pagamento&&x.data_pagamento!==x.data)?
+      " · pago "+new Date(x.data_pagamento+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"}):"";
+    return '<div class="row"><div class="row-ic"'+(pago?'':' style="opacity:.55"')+'>'+esc(c.icon)+'</div>'+
       '<div class="row-mid"><div class="row-nm">'+esc(x.descricao)+
-      (x.origem_patrimonio_id?' <span class="tag tag-gold">parcela</span>':'')+'</div>'+
-      '<div class="row-sub">'+d+' · '+esc(c.nome)+(pay?" · "+esc(pay.nome):"")+fat+'</div></div>'+
-      '<div class="row-val" style="color:'+(x.tipo==="r"?"var(--up)":"var(--down)")+'">'+
+      (x.origem_patrimonio_id?' <span class="tag tag-gold">parcela</span>':'')+selo+'</div>'+
+      '<div class="row-sub">'+d+' · '+esc(c.nome)+(pay?" · "+esc(pay.nome):"")+fat+quandoPagou+'</div></div>'+
+      '<div class="row-val" style="color:'+(pago?(x.tipo==="r"?"var(--up)":"var(--down)"):"var(--paper3)")+'">'+
         (x.tipo==="r"?"+":"−")+brl(x.valor)+'</div>'+
+      (pago?'':'<button class="btn btn-go btn-sm no-print" style="width:auto" onclick="openPay(\''+x.id+'\')">'+
+        (x.tipo==="r"?"Recebi":"Paguei")+'</button>')+
       '<button class="row-act" onclick="openTxn(\''+x.id+'\')">&#9998;</button>'+
       '<button class="row-act" onclick="delTxn(\''+x.id+'\')">&#10005;</button></div>'}).join("")
     :'<div class="empty"><span class="e">&#8801;</span>Nenhum lançamento aqui.<br>Use a aba Lançar para começar.</div>';
+}
+/* ── registrar pagamento ── */
+function openPay(id){
+  const t=D.txns.find(function(x){return x.id===id}); if(!t)return;
+  document.getElementById("pay-id").value=id;
+  document.getElementById("pay-info").innerHTML=
+    "<b>"+esc(t.descricao)+"</b><br>"+brl(t.valor)+" · vencimento "+
+    new Date(t.data+"T12:00:00").toLocaleDateString("pt-BR");
+  document.getElementById("pay-date").value=hoje();
+  openV("v-pay");
+}
+async function confirmPay(){
+  const id=document.getElementById("pay-id").value;
+  const quando=document.getElementById("pay-date").value||hoje();
+  setSync("busy");
+  try{
+    const u=await api.updTxn(id,{pago:true,data_pagamento:quando});
+    const i=D.txns.findIndex(function(x){return x.id===id});
+    if(i>=0)D.txns[i]=u[0]||Object.assign({},D.txns[i],{pago:true,data_pagamento:quando});
+    closeV("v-pay");setSync("ok");toast("Pagamento registrado");draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,70),4200)}
+}
+async function unpay(id){
+  setSync("busy");
+  try{
+    const u=await api.updTxn(id,{pago:false,data_pagamento:null});
+    const i=D.txns.findIndex(function(x){return x.id===id});
+    if(i>=0)D.txns[i]=u[0]||Object.assign({},D.txns[i],{pago:false,data_pagamento:null});
+    setSync("ok");toast("Voltou para a previsão");draw();
+  }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
 }
 function setFilter(f){filter=f;drawList()}
 function openTxn(id){
@@ -878,7 +1023,14 @@ function openTxn(id){
   const isCard=t.tipo==="d"&&t.cartao_id&&t.cartao_id!=="dinheiro";
   document.getElementById("e-fat-wrap").style.display=isCard?"":"none";
   document.getElementById("e-fat").value=t.competencia||suggestFatura(t.data,t.cartao_id);
+  document.getElementById("e-pago").value=isPaid(t)?"1":"0";
+  document.getElementById("e-pagoem").value=t.data_pagamento||t.data;
+  toggleEPay();
   openV("v-txn");
+}
+function toggleEPay(){
+  document.getElementById("e-pagoem-wrap").style.display=
+    document.getElementById("e-pago").value==="1"?"":"none";
 }
 async function saveTxnEdit(){
   const id=document.getElementById("e-id").value;
@@ -892,13 +1044,15 @@ async function saveTxnEdit(){
   if(!descricao){toast("Escreva a descrição");return}
   const isCard=tipo==="d"&&cartao_id!=="dinheiro";
   const competencia=isCard?(document.getElementById("e-fat").value||null):null;
+  const pg=document.getElementById("e-pago").value==="1";
+  const pgEm=pg?(document.getElementById("e-pagoem").value||data):null;
+  const campos={valor:valor,descricao:descricao,data:data,categoria_id:categoria_id,
+    cartao_id:cartao_id,competencia:competencia,pago:pg,data_pagamento:pgEm};
   setSync("busy");
   try{
-    const u=await api.updTxn(id,{valor:valor,descricao:descricao,data:data,
-      categoria_id:categoria_id,cartao_id:cartao_id,competencia:competencia});
+    const u=await api.updTxn(id,campos);
     const i=D.txns.findIndex(function(x){return x.id===id});
-    if(i>=0)D.txns[i]=u[0]||Object.assign({},D.txns[i],{valor:valor,descricao:descricao,
-      data:data,categoria_id:categoria_id,cartao_id:cartao_id,competencia:competencia});
+    if(i>=0)D.txns[i]=u[0]||Object.assign({},D.txns[i],campos);
     closeV("v-txn");setSync("ok");toast("Lançamento atualizado");draw();
   }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
 }
@@ -986,9 +1140,12 @@ async function makeParcels(item,firstYM){
   const rows=[];
   for(let i=0;i<tot;i++){
     const comp=y+"-"+String(m+1).padStart(2,"0");
+    // parcelas já quitadas entram como pagas; as futuras ficam previstas
+    const quitada=i<Number(item.parcelas_pagas||0);
     rows.push({descricao:item.descricao+" ("+(i+1)+"/"+tot+")",valor:pm,
       data:comp+"-05",tipo:"d",categoria_id:catFin.id,cartao_id:"dinheiro",
-      competencia:comp,origem_patrimonio_id:item.id});
+      competencia:comp,origem_patrimonio_id:item.id,
+      pago:quitada, data_pagamento:quitada?comp+"-05":null});
     m++;if(m>11){m=0;y++}
   }
   for(let i=0;i<rows.length;i+=50){
