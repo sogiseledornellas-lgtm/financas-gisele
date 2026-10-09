@@ -220,7 +220,7 @@ body{overflow:hidden}
       </div>
       <div class="amount">
         <span>R$</span>
-        <input type="number" id="a-val" inputmode="decimal" placeholder="0,00" step="0.01" min="0"/>
+        <input type="number" id="a-val" inputmode="decimal" placeholder="0,00" step="0.01" min="0" oninput="parcPreview()"/>
       </div>
       <div id="quick-wrap" style="margin-bottom:4px">
         <div class="card-t">Atalhos</div>
@@ -235,6 +235,16 @@ body{overflow:hidden}
         <div class="fld" id="a-fat-wrap" style="display:none"><label>Entra na fatura de</label>
           <input type="month" id="a-fat"/></div>
       </div>
+      <div class="row2">
+        <div class="fld"><label>Em quantas vezes</label>
+          <input type="number" id="a-parc" min="1" max="72" step="1" value="1" oninput="parcPreview()"/></div>
+        <div class="fld" id="a-mode-wrap" style="display:none"><label>O valor acima é</label>
+          <select id="a-mode" onchange="parcPreview()">
+            <option value="total">o total da compra</option>
+            <option value="parcela">o valor de cada parcela</option>
+          </select></div>
+      </div>
+      <div id="a-parc-prev" style="display:none;margin-bottom:12px"></div>
       <div class="fld"><label>Situação</label>
         <div class="seg" style="margin-bottom:0">
           <button id="st-1" onclick="setPaid(true)">Já paguei</button>
@@ -485,6 +495,7 @@ const api={
   updTxn:function(id,d){return sb("transacoes?id=eq."+id,{method:"PATCH",body:JSON.stringify(d)})},
   delTxn:function(id){return sb("transacoes?id=eq."+id,{method:"DELETE",prefer:""})},
   delTxnBy:function(p){return sb("transacoes?origem_patrimonio_id=eq."+p,{method:"DELETE",prefer:""})},
+  delGrupo:function(g){return sb("transacoes?grupo_parcela=eq."+g,{method:"DELETE",prefer:""})},
   cards:function(){return sb("cartoes?order=criado_em.asc")},
   addCard:function(d){return sb("cartoes",{method:"POST",body:JSON.stringify(d)})},
   updCard:function(id,d){return sb("cartoes?id=eq."+id,{method:"PATCH",body:JSON.stringify(d)})},
@@ -624,7 +635,7 @@ function setKind(k){
   document.getElementById("tg-r").className=k==="r"?"on-r":"";
   document.getElementById("a-pay-wrap").style.display=k==="d"?"":"none";
   pickedCat=null;
-  drawAdd(); refreshFatura(); setPaid(paid);
+  drawAdd(); refreshFatura(); setPaid(paid); parcPreview();
 }
 function setPaid(v){
   paid=v;
@@ -647,7 +658,7 @@ function drawAdd(){
   drawQuick(); drawFix();
 }
 function pickCat(id){pickedCat=id;drawAdd()}
-function pickPay(id){pickedPay=id;drawAdd();refreshFatura()}
+function pickPay(id){pickedPay=id;drawAdd();refreshFatura();parcPreview()}
 
 function drawQuick(){
   const recent=D.txns.filter(function(t){return t.tipo===kind&&!t.origem_patrimonio_id}).slice(0,150);
@@ -689,6 +700,54 @@ function refreshFatura(){
   if(isCard)document.getElementById("a-fat").value=
     suggestFatura(document.getElementById("a-date").value,pickedPay);
 }
+/* ── parcelamento ── */
+function addMonths(ym,n){            // "2026-10" + n meses
+  const p=String(ym).split("-"); let y=+p[0], m=+p[1]-1+n;
+  y+=Math.floor(m/12); m=((m%12)+12)%12;
+  return y+"-"+String(m+1).padStart(2,"0");
+}
+function dateAddMonths(dataStr,n){   // mantém o dia, respeitando meses curtos
+  const p=String(dataStr).split("-");
+  const dia=+p[2]; const ym=addMonths(p[0]+"-"+p[1],n);
+  const q=ym.split("-"); const ultimo=new Date(+q[0],+q[1],0).getDate();
+  return ym+"-"+String(Math.min(dia,ultimo)).padStart(2,"0");
+}
+// divide o total em n parcelas, jogando a sobra dos centavos na primeira
+function dividir(total,n){
+  const base=Math.floor((total*100)/n)/100;
+  const arr=new Array(n).fill(base);
+  arr[0]=Math.round((total-base*(n-1))*100)/100;
+  return arr;
+}
+function parcInfo(){
+  const n=parseInt(document.getElementById("a-parc").value)||1;
+  const v=parseFloat(document.getElementById("a-val").value)||0;
+  const modo=document.getElementById("a-mode").value;
+  const total=(n>1&&modo==="parcela")?Math.round(v*n*100)/100:v;
+  return {n:n, total:total, valores:n>1?dividir(total,n):[total]};
+}
+function parcPreview(){
+  const n=parseInt(document.getElementById("a-parc").value)||1;
+  document.getElementById("a-mode-wrap").style.display=n>1?"":"none";
+  const box=document.getElementById("a-parc-prev");
+  const v=parseFloat(document.getElementById("a-val").value)||0;
+  if(n<2||v<=0){box.style.display="none";return}
+  const inf=parcInfo();
+  const isCard=kind==="d"&&pickedPay!=="dinheiro";
+  const ini=isCard?(document.getElementById("a-fat").value||ymNow())
+                  :(document.getElementById("a-date").value||"").slice(0,7);
+  const fim=addMonths(ini,n-1);
+  const mesNome=function(ym){const q=ym.split("-");return MES[+q[1]-1].slice(0,3)+"/"+q[0]};
+  const iguais=inf.valores.every(function(x){return x===inf.valores[0]});
+  box.style.display="";
+  box.innerHTML='<div class="note">'+
+    '<div class="l"><span>'+n+'× de</span><b>'+brl(inf.valores[n-1])+
+      (iguais?'':' <span style="color:var(--paper3);font-weight:400">(1ª de '+brl(inf.valores[0])+')</span>')+'</b></div>'+
+    '<div class="l"><span>Total da compra</span><b>'+brl(inf.total)+'</b></div>'+
+    '<div class="l" style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">'+
+      '<span>'+(isCard?'Nas faturas de':'Vence de')+'</span><b>'+mesNome(ini)+' a '+mesNome(fim)+'</b></div>'+
+    '</div>';
+}
 async function saveEntry(){
   const valor=parseFloat(document.getElementById("a-val").value);
   const descricao=document.getElementById("a-desc").value.trim();
@@ -698,22 +757,46 @@ async function saveEntry(){
   if(!data){toast("Escolha a data");return}
   if(!pickedCat){toast("Escolha uma categoria");return}
   const isCard=kind==="d"&&pickedPay!=="dinheiro";
-  const novo={descricao:descricao,valor:valor,data:data,tipo:kind,categoria_id:pickedCat,
-    cartao_id:kind==="d"?pickedPay:"dinheiro",
-    competencia:isCard?(document.getElementById("a-fat").value||null):null,
-    pago:paid, data_pagamento:paid?data:null};
+  const inf=parcInfo();
+  const n=inf.n;
   const btn=document.getElementById("a-go");
   btn.disabled=true;btn.textContent="Salvando…";setSync("busy");
   try{
-    const r=await api.addTxn(novo);
-    D.txns.unshift(r[0]);
+    if(n<2){
+      const r=await api.addTxn({descricao:descricao,valor:valor,data:data,tipo:kind,
+        categoria_id:pickedCat, cartao_id:kind==="d"?pickedPay:"dinheiro",
+        competencia:isCard?(document.getElementById("a-fat").value||null):null,
+        pago:paid, data_pagamento:paid?data:null});
+      D.txns.unshift(r[0]);
+      toast(paid?(kind==="r"?"Receita registrada":"Despesa registrada")
+                :(kind==="r"?"Receita prevista":"Conta a pagar registrada"));
+    } else {
+      const grupo="p"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+      const fat0=isCard?(document.getElementById("a-fat").value||ymNow()):null;
+      const linhas=[];
+      for(let i=0;i<n;i++){
+        const dt=dateAddMonths(data,i);
+        // a 1ª herda a situação escolhida; as seguintes ficam previstas
+        const pg=(i===0)?paid:false;
+        linhas.push({descricao:descricao+" ("+(i+1)+"/"+n+")", valor:inf.valores[i],
+          data:dt, tipo:kind, categoria_id:pickedCat,
+          cartao_id:kind==="d"?pickedPay:"dinheiro",
+          competencia:isCard?addMonths(fat0,i):null,
+          pago:pg, data_pagamento:pg?dt:null, grupo_parcela:grupo});
+      }
+      for(let i=0;i<linhas.length;i+=50){
+        const feito=await api.addTxn(linhas.slice(i,i+50));
+        (feito||[]).forEach(function(t){D.txns.unshift(t)});
+      }
+      toast(n+"× de "+brl(inf.valores[n-1])+" lançadas · total "+brl(inf.total),4600);
+    }
     document.getElementById("a-val").value="";
     document.getElementById("a-desc").value="";
+    document.getElementById("a-parc").value="1";
+    parcPreview();
     setSync("ok");
-    toast(paid?(kind==="r"?"Receita registrada":"Despesa registrada")
-              :(kind==="r"?"Receita prevista":"Conta a pagar registrada"));
     draw();
-  }catch(e){setSync("off");toast("Não salvou: "+String(e.message).slice(0,60),4200)}
+  }catch(e){setSync("off");toast("Não salvou: "+String(e.message).slice(0,70),4600)}
   btn.disabled=false;btn.textContent="Salvar lançamento";
 }
 
@@ -965,7 +1048,7 @@ function drawList(){
       " · pago "+new Date(x.data_pagamento+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"}):"";
     return '<div class="row"><div class="row-ic"'+(pago?'':' style="opacity:.55"')+'>'+esc(c.icon)+'</div>'+
       '<div class="row-mid"><div class="row-nm">'+esc(x.descricao)+
-      (x.origem_patrimonio_id?' <span class="tag tag-gold">parcela</span>':'')+selo+'</div>'+
+      ((x.origem_patrimonio_id||x.grupo_parcela)?' <span class="tag tag-gold">parcela</span>':'')+selo+'</div>'+
       '<div class="row-sub">'+d+' · '+esc(c.nome)+(pay?" · "+esc(pay.nome):"")+fat+quandoPagou+'</div></div>'+
       '<div class="row-val" style="color:'+(pago?(x.tipo==="r"?"var(--up)":"var(--down)"):"var(--paper3)")+'">'+
         (x.tipo==="r"?"+":"−")+brl(x.valor)+'</div>'+
@@ -1057,12 +1140,27 @@ async function saveTxnEdit(){
   }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
 }
 async function delTxn(id){
-  if(!confirm("Apagar este lançamento?"))return;
+  const t=D.txns.find(function(x){return x.id===id});
+  let grupo=null;
+  if(t&&t.grupo_parcela){
+    const irmas=D.txns.filter(function(x){return x.grupo_parcela===t.grupo_parcela});
+    if(irmas.length>1){
+      grupo=confirm("Esta compra tem "+irmas.length+" parcelas.\n\nOK = apagar TODAS as parcelas\nCancelar = apagar só esta");
+    }
+  }
+  if(!grupo&&!confirm("Apagar este lançamento?"))return;
   setSync("busy");
   try{
-    await api.delTxn(id);
-    D.txns=D.txns.filter(function(x){return x.id!==id});
-    setSync("ok");toast("Apagado");draw();
+    if(grupo){
+      await api.delGrupo(t.grupo_parcela);
+      D.txns=D.txns.filter(function(x){return x.grupo_parcela!==t.grupo_parcela});
+      toast("Parcelamento apagado");
+    }else{
+      await api.delTxn(id);
+      D.txns=D.txns.filter(function(x){return x.id!==id});
+      toast("Apagado");
+    }
+    setSync("ok");draw();
   }catch(e){setSync("off");toast("Erro: "+String(e.message).slice(0,60))}
 }
 
